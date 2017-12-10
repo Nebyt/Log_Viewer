@@ -18,15 +18,12 @@ class Tab:
 
         self.scroll = tkinter.Scrollbar(self.page)  # объект скролбарр на вкладку
         self.txt = tkinter.Text(self.page, font="TextFont", yscrollcommand=self.scroll.set)  # объект текстовое поле
-        self.page.grid(row=1, column=0, sticky='nesw')
-        self.page.grid_propagate()
-        self.txt.grid(row=1, column=0, sticky='nesw')  # задаем размещение текстового поле
+
         self.scroll.config(command=self.txt.yview)  # прикрепляем скроллбар к текстовому полю
 
-        #self.txt.pack(side='left', expand=True)  # задаем размещение текстового поле
-        #self.scroll.pack(side='right', fill=tkinter.Y)  # задаем размещение скроллбара
+        self.txt.pack(side='left', fill='both', expand=True)  # задаем размещение текстового поле
+        self.scroll.pack(side='right', fill=tkinter.Y)  # задаем размещение скроллбара
 
-        self.scroll.grid(row=1, column=50, sticky='nse')  # задаем размещение скроллбара
         main_space.add(self.page, text='{}'.format(self.tab_name))  # добавляем вкладку
 
         self.txt.insert(tkinter.END, self.document.get_lines())  # вставляем текст из нашего документа
@@ -72,17 +69,9 @@ m = tkinter.Menu(root)
 root.config(menu=m)
 m.add_command(label="Open...", command=add_tab)
 
-# gives weight to the cells in the grid
-rows = 0
-while rows < 50:
-    root.rowconfigure(rows, weight=1)
-    root.columnconfigure(rows, weight=1)
-    rows += 1
-
 # Defines and places the notebook widget
 nb = ttk.Notebook(root)
-# TODO заменить на упаковщик pack()
-nb.grid(row=1, column=0, columnspan=50, rowspan=49, sticky='NESW')
+nb.pack(fill='both', expand='yes')
 # здесь заканчивается описание UI
 
 
