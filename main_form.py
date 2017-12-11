@@ -63,18 +63,21 @@ def add_tab():
         return
 
 
-# здесь начинается описание UI
-root = tkinter.Tk()
 if os.name == 'posix':
     app_width = APP_WIDTH_LINUX
+    path_to_icon = os.path.join(os.path.realpath(__file__), 'icon.ico')
 else:
     app_width = APP_WIDTH_WIN
+    path_to_icon = 'icon.ico'
+
+# здесь начинается описание UI
+root = tkinter.Tk()
 
 app_height = APP_HEIGHT
 start_pos_x = int((root.winfo_screenwidth() / 2) - (app_width / 2))
 start_pos_y = int((root.winfo_screenheight() / 2.5) - (app_height / 2))
 root.title('LogViewer')
-root.iconbitmap(r''.format(os.path.join(os.path.realpath(__file__), 'icon.ico')))
+root.iconbitmap(path_to_icon)
 root.geometry('{0}x{1}+{2}+{3}'.format(app_width, app_height, start_pos_x, start_pos_y))
 root.minsize(app_width, app_height)
 
