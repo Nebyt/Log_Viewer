@@ -3,8 +3,10 @@ from tkinter.filedialog import askopenfilename
 import time
 import threading
 import os
+import mimetypes
 from custom_notebook import CustomNotebook
 from custom_tab import Tab
+from modal_window import ModalWindow
 
 
 APP_WIDTH_WIN = 750
@@ -34,7 +36,13 @@ def update_tabs():
 def add_tab():
     file_path = path_to_file()
     if file_path:
-        list_of_tab.append(Tab(nb, file_path))
+        type_of_file = mimetypes.guess_type(file_path)
+        type_of_file = type_of_file[0].split('/')[0]
+        if type_of_file == 'text':
+            list_of_tab.append(Tab(nb, file_path))
+        else:
+            modal_window = ModalWindow()
+            modal_window.show()
     else:
         return
 
