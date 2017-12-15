@@ -37,8 +37,9 @@ def add_tab():
     file_path = path_to_file()
     if file_path:
         type_of_file = mimetypes.guess_type(file_path)
-        type_of_file = type_of_file[0].split('/')[0]
-        if type_of_file == 'text':
+        if type_of_file[0]:
+            type_of_file = type_of_file[0].split('/')[0]
+        if type_of_file == 'text' or not type_of_file[0]:
             list_of_tab.append(Tab(nb, file_path))
         else:
             modal_window = ModalWindow()

@@ -17,7 +17,7 @@ class ModalWindow:
         if os.name == 'nt':
             self.top.attributes('-toolwindow', 1)
 
-        self.msg = tkinter.Message(self.top, text="This is does't text file!", justify='left', width=190)
+        self.msg = tkinter.Message(self.top, text="This is not a text file!", justify='left', width=190)
         self.msg.pack(side='top', fill='both', expand=True)
 
         self.button = tkinter.Button(self.top, text="Close", command=self.top.destroy)

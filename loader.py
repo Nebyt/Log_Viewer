@@ -12,6 +12,11 @@ class Tail:
         self.__last_change = os.stat(self.__path).st_mtime
         return self.__last_change
 
+    def __recognize_coding(self, path_to_file):
+        with open(r'{0}'.format(self.__path), 'rb') as file:
+            pass
+        pass
+
     def get_lines(self):
         if self.__last_change <= self.__check_update():
             with open(r'{0}'.format(self.__path), 'r') as file:
