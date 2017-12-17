@@ -60,12 +60,8 @@ else:
 root = tkinter.Tk()
 
 app_height = APP_HEIGHT
-start_pos_x = int((root.winfo_screenwidth() / 2) - (app_width / 2))
-start_pos_y = int((root.winfo_screenheight() / 2.5) - (app_height / 2))
-root.title('LogViewer')
-root.iconbitmap(path_to_icon)
-root.geometry('{0}x{1}+{2}+{3}'.format(app_width, app_height, start_pos_x, start_pos_y))
-root.minsize(app_width, app_height)
+start_pos_x = root.winfo_screenwidth() - int((app_width / 2))
+start_pos_y = root.winfo_screenheight() - int((app_height / 2))
 
 m = tkinter.Menu(root)
 root.config(menu=m)
@@ -81,4 +77,9 @@ nb.pack(fill='both', expand='yes')
 thread_update_tabs = threading.Thread(target=update_tabs, daemon=True, name='update_tabs')
 thread_update_tabs.start()
 
+root.title('LogViewer')
+root.iconbitmap(path_to_icon)
+root.geometry('{0}x{1}'.format(app_width, app_height))
+root.minsize(app_width, app_height)
+root.geometry('+{0}+{1}'.format(start_pos_x, start_pos_y))
 root.mainloop()  # запуск отрисовки UI

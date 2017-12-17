@@ -29,9 +29,9 @@ def fill_file():
                     print('Stop the script')
                     sys.exit(0)
                 else:
-                    with open('test_{0}.log'.format(count), 'a') as file:
+                    with open('test_{0}.log'.format(count), 'a', encoding='utf-8') as file:
                         file.writelines('Новая строка {} лога\n'.format(k))
-                    print('Новая строка {} лог\n'.format(k))
+                    print('New string Новая строка {} лог\n'.format(k))
                     k += 1
                 time.sleep(1)
         else:

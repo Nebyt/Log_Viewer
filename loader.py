@@ -1,4 +1,5 @@
 import os
+import recognize_codec
 
 
 class Tail:
@@ -7,19 +8,21 @@ class Tail:
         self.__tail = 0
         self.__last_change = 0
         self.__log_content = ''
+        self.__fmt = ''
 
     def __check_update(self):
         self.__last_change = os.stat(self.__path).st_mtime
         return self.__last_change
 
-    def __recognize_coding(self, path_to_file):
-        with open(r'{0}'.format(self.__path), 'rb') as file:
-            pass
-        pass
+    def __recognize_format(self, path_to_file):
+        self.__fmt = recognize_codec.get_string_to_recognize(path_to_file)
 
     def get_lines(self):
+        print(self.__fmt)
+        if not self.__fmt:
+            self.__recognize_format(self.__path)
         if self.__last_change <= self.__check_update():
-            with open(r'{0}'.format(self.__path), 'r') as file:
+            with open(r'{0}'.format(self.__path), 'r', encoding='{}'.format(self.__fmt)) as file:
                 file.seek(self.__tail)
                 self.__log_content = file.read()
                 self.__tail = file.tell()
