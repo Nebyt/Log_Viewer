@@ -7,8 +7,6 @@ __encodings = {
     'MAC':        'mac',
 }
 
-__string_massive = ''
-
 """
 Определение кодировки текста
 """
@@ -78,10 +76,12 @@ def __get_codepage(string=None):
                 idx = item
         if idx == 'WIN-1251':
             idx = 'windows-1251'
+        if not maximum:
+            idx = 'ASCII'
         return idx.lower()
 
 
 def get_string_to_recognize(path):
     with open(path, 'rb') as file:
-        string_massive = file.read(1000)
+        string_massive = file.read(25000)
     return __get_codepage(string_massive)

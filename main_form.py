@@ -42,7 +42,8 @@ def add_tab():
         if type_of_file == 'text' or not type_of_file[0]:
             list_of_tab.append(Tab(nb, file_path))
         else:
-            modal_window = ModalWindow()
+            file_name = file_path.split('/')[-1]
+            modal_window = ModalWindow(file_name)
             modal_window.show()
     else:
         return

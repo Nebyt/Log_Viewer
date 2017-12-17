@@ -13,7 +13,8 @@ class Tab:
         self.tab_name = file_path.split('/')[-1]  # имя вкладки, берем последнее значение после разделения по символу /
 
         self.scroll = tkinter.Scrollbar(self.page)  # объект скролбарр на вкладку
-        self.txt = tkinter.Text(self.page, font="TextFont", yscrollcommand=self.scroll.set)  # объект текстовое поле
+        self.txt = tkinter.Text(self.page, font="TextFont",
+                                spacing3=2, yscrollcommand=self.scroll.set)  # объект текстовое поле
 
         self.scroll.config(command=self.txt.yview)  # прикрепляем скроллбар к текстовому полю
 
