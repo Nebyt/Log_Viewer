@@ -7,6 +7,7 @@ import time
 
 class Tab:
     def __init__(self, main_space, file_path=''):
+        self.path_to_file = file_path
         self.__end = 0
         self.document = Tail(file_path)  # создаем на вкладке объект документа, который читаем
         self.page = ttk.Frame(main_space)  # объект вкладка

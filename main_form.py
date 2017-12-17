@@ -1,5 +1,6 @@
 import tkinter
 from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import asksaveasfilename, asksaveasfile
 import time
 import threading
 import os
@@ -16,12 +17,24 @@ APP_HEIGHT = 400
 
 # список всех вкладок
 list_of_tab = []
+paths = []
 
 
 # диалоговое окно открытия файла, возвращает путь к файлу
 def path_to_file():
-    op = askopenfilename()
+    op = askopenfilename(defaultextension='.log',
+                         filetypes=(("Log files", ".log"),
+                                    ("Text files", ".txt"),
+                                    ("All files", ".*")))
     return op
+
+
+def save_file():
+    pass
+
+
+def save_all_file(tabs=list_of_tab):
+    pass
 
 
 # обновление информации на всех вкладках
@@ -61,12 +74,20 @@ else:
 root = tkinter.Tk()
 
 app_height = APP_HEIGHT
-start_pos_x = root.winfo_screenwidth() - int((app_width / 2))
-start_pos_y = root.winfo_screenheight() - int((app_height / 2))
+start_pos_x = int(root.winfo_screenwidth() / 2) - int((app_width / 2))
+start_pos_y = int(root.winfo_screenheight() / 2.5) - int((app_height / 2))
 
-m = tkinter.Menu(root)
-root.config(menu=m)
-m.add_command(label="Open...", command=add_tab)
+menubar = tkinter.Menu(root)
+save_button = tkinter.Menu(root)
+
+root.config(menu=menubar)
+menubar.add_command(label="Open..", command=add_tab)
+save_menu = tkinter.Menu(menubar)
+
+save_menu.add_command(label='Save active', command=save_file)
+save_menu.add_command(label='Save all...', command=save_all_file())
+save_menu.add_separator()
+menubar.add_cascade(label='Save..', menu=save_menu)
 
 # Defines and places the notebook widget
 nb = CustomNotebook(root)
