@@ -1,6 +1,5 @@
 import tkinter
 from tkinter.filedialog import askopenfilename
-from tkinter.filedialog import asksaveasfilename, asksaveasfile
 import time
 import threading
 import os
@@ -8,6 +7,7 @@ import mimetypes
 from custom_notebook import CustomNotebook
 from custom_tab import Tab
 from modal_window import ModalWindow
+from saver import Saver
 
 
 APP_WIDTH_WIN = 750
@@ -17,7 +17,6 @@ APP_HEIGHT = 400
 
 # список всех вкладок
 list_of_tab = []
-paths = []
 
 
 # диалоговое окно открытия файла, возвращает путь к файлу
@@ -29,12 +28,16 @@ def path_to_file():
     return op
 
 
-def save_file():
-    pass
+def save_file(tabs=list_of_tab):
+    tab_name = nb.tab(nb.select(), 'text')
+    saver = Saver(tabs, tab_name)
+    saver.save_one()
+
 
 
 def save_all_file(tabs=list_of_tab):
-    pass
+    saver = Saver(tabs)
+    saver.save_all()
 
 
 # обновление информации на всех вкладках
@@ -85,7 +88,7 @@ menubar.add_command(label="Open..", command=add_tab)
 save_menu = tkinter.Menu(menubar)
 
 save_menu.add_command(label='Save active', command=save_file)
-save_menu.add_command(label='Save all...', command=save_all_file())
+save_menu.add_command(label='Save all...', command=save_all_file)
 save_menu.add_separator()
 menubar.add_cascade(label='Save..', menu=save_menu)
 
