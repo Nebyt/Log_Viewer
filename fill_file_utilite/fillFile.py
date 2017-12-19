@@ -4,14 +4,13 @@ import msvcrt
 import threading
 import os
 
-pressedKey = ''
+pressed_key = ''
 
 
 def press_key():
-    global pressedKey
     while True:
-        pressedKey = msvcrt.getwch()
-        if pressedKey == 'q':
+        pressed_key = msvcrt.getwch()
+        if pressed_key == 'q':
             sys.exit()
         time.sleep(0.5)
 
@@ -25,12 +24,12 @@ def fill_file():
         file_path = '{0}{1}{2}'.format(os.getcwd(), os.sep, 'test_{0}.log'.format(count))
         if not os.path.exists(r'{0}'.format(file_path)):
             while True:
-                if pressedKey == 'q':
+                if pressed_key == 'q':
                     print('Stop the script')
                     sys.exit(0)
                 else:
-                    with open('test_{0}.log'.format(count), 'a', encoding='utf-8') as file:
-                        file.writelines('Новая строка {} лога\n'.format(k))
+                    with open('test_{0}.log'.format(count), 'a') as file:
+                        file.writelines('New string Новая строка {} лога\n'.format(k))
                     print('New string Новая строка {} лог\n'.format(k))
                     k += 1
                 time.sleep(1)

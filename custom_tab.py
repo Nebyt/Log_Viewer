@@ -9,6 +9,7 @@ class Tab:
     def __init__(self, main_space, file_path=''):
         self.path_to_file = file_path
         self.__end = 0
+        self.all_visible_text = ''
         self.document = Tail(file_path)  # создаем на вкладке объект документа, который читаем
         self.page = ttk.Frame(main_space)  # объект вкладка
         self.tab_name = file_path.split('/')[-1]  # имя вкладки, берем последнее значение после разделения по символу /
@@ -56,3 +57,7 @@ class Tab:
     def __stop_watch_tail(self, event):
         """останавливаем цикл, который постоянно мониторит последнюю строку"""
         self.__end = 0
+
+    def get_all_text(self):
+        self.all_visible_text = self.txt.get(1.0, tkinter.END)
+        return self.all_visible_text

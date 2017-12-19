@@ -1,5 +1,7 @@
 import zipfile
-from tkinter.filedialog import asksaveasfile, asksaveasfilename
+import os
+from shutil import copy
+from tkinter.filedialog import asksaveasfilename
 from os.path import basename
 from datetime import datetime
 
@@ -10,19 +12,27 @@ class Saver:
         self.tab_name = tab_name
         self.all_tabs = all_tabs
         self.original_path = ''
+        self.current_tab_text = ''
         for tab in self.all_tabs:
             self.tabs_paths.append(tab.path_to_file)
         self.path_to_save = ''
 
     def save_all(self):
-        current_moment = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        print(current_moment)
+        current_moment = datetime.now().strftime('%Y%m%d_%H%M%S')
         self.path_to_save = asksaveasfilename(title='Save archive', initialfile='{}.zip'.format(current_moment),
                                               filetypes=(("ZIP File", "*.zip"), ("All files", "*.*")))
-        #TODO added try except to empty path
-        with zipfile.ZipFile('{}'.format(self.path_to_save), 'a') as my_zip:
-            for path_file in self.tabs_paths:
-                my_zip.write(basename(path_file))
+        if self.path_to_save:
+            with zipfile.ZipFile('{}'.format(self.path_to_save), 'a',
+                                 compression=zipfile.ZIP_STORED, allowZip64=True) as my_zip:
+                for tab in self.all_tabs:
+                    self.current_tab_text = tab.get_all_text()
+                    tmp_file = basename(tab.path_to_file)
+                    with open(tmp_file, 'w') as file:
+                        file.write(self.current_tab_text)
+                    my_zip.write(tmp_file)
+                    os.remove(tmp_file)
+        else:
+            return
 
     def save_one(self):
         for tab in self.all_tabs:
@@ -33,7 +43,8 @@ class Saver:
                                               filetypes=(("Log File", "*.log"),
                                                          ("Text File", "*.txt"),
                                                          ("All files", "*.*")))
-        # TODO added try except to empty path
-        with open('{}'.format(self.path_to_save), 'a') as save_file:
-            save_file.write(self.original_path)
-
+        print(self.path_to_save)
+        if self.path_to_save:
+            copy(self.original_path, self.path_to_save)
+        else:
+            return
