@@ -37,14 +37,15 @@ class Saver:
     def save_one(self):
         for tab in self.all_tabs:
             if tab.tab_name == self.tab_name:
-                self.original_path = tab.path_to_file
-        self.path_to_save = asksaveasfilename(title='Save file',
-                                              initialfile='{}'.format(self.tab_name),
-                                              filetypes=(("Log File", "*.log"),
-                                                         ("Text File", "*.txt"),
-                                                         ("All files", "*.*")))
-        print(self.path_to_save)
-        if self.path_to_save:
-            copy(self.original_path, self.path_to_save)
-        else:
-            return
+                self.current_tab_text = tab.get_all_text()
+                tmp_file = basename(tab.path_to_file)
+                self.path_to_save = asksaveasfilename(title='Save file',
+                                                      initialfile='{}'.format(self.tab_name),
+                                                      filetypes=(("Log File", "*.log"),
+                                                                 ("Text File", "*.txt"),
+                                                                 ("All files", "*.*")))
+                if self.path_to_save:
+                    with open(tmp_file, 'w') as file:
+                        file.write(self.current_tab_text)
+                else:
+                    return
