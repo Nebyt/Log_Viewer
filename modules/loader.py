@@ -1,5 +1,5 @@
 import os
-import recognize_codec
+import modules.recognize_codec as codec
 
 
 class Tail:
@@ -15,10 +15,9 @@ class Tail:
         return self.__last_change
 
     def __recognize_format(self, path_to_file):
-        self.__fmt = recognize_codec.get_string_to_recognize(path_to_file)
+        self.__fmt = codec.get_string_to_recognize(path_to_file)
 
     def get_lines(self):
-        print(self.__fmt)
         if not self.__fmt:
             self.__recognize_format(self.__path)
         if self.__last_change <= self.__check_update():
@@ -28,10 +27,3 @@ class Tail:
                 self.__tail = file.tell()
         return self.__log_content
 
-
-if __name__ == '__main__':
-    import time
-    test_file = Tail(r'C:\Users\Denis\PycharmProjects\pyLogViewer\test.log')
-    for k in range(60):
-        print(test_file.get_lines())
-        time.sleep(1)

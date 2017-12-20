@@ -4,10 +4,10 @@ import time
 import threading
 import os
 import mimetypes
-from custom_notebook import CustomNotebook
-from custom_tab import Tab
-from modal_window import ModalWindow
-from saver import Saver
+from UI_modules.custom_notebook import CustomNotebook
+from UI_modules.custom_tab import Tab
+from UI_modules.modal_window import ModalWindow
+from modules.saver import Saver
 
 
 APP_WIDTH_WIN = 750
@@ -32,7 +32,6 @@ def save_file(tabs=list_of_tab):
     tab_name = nb.tab(nb.select(), 'text')
     saver = Saver(tabs, tab_name)
     saver.save_one()
-
 
 
 def save_all_file(tabs=list_of_tab):

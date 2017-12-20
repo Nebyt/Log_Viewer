@@ -1,6 +1,5 @@
 import zipfile
 import os
-from shutil import copy
 from tkinter.filedialog import asksaveasfilename
 from os.path import basename
 from datetime import datetime

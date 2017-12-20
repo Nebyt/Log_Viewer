@@ -1,4 +1,4 @@
-from loader import Tail
+from modules.loader import Tail
 import tkinter
 from tkinter import ttk
 import threading
