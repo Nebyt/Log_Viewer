@@ -1,5 +1,6 @@
 import tkinter
 from tkinter import ttk
+from modules.list_of_tab import list_of_tab
 
 
 class CustomNotebook(ttk.Notebook):
@@ -10,7 +11,7 @@ class CustomNotebook(ttk.Notebook):
     def __init__(self, *args, **kwargs):
         if not self.__initialized:
             self.__initialize_custom_style()
-            self.__inititialized = True
+            self.__initialized = True
 
         kwargs["style"] = "CustomNotebook"
         ttk.Notebook.__init__(self, *args, **kwargs)
@@ -37,7 +38,8 @@ class CustomNotebook(ttk.Notebook):
 
         element = self.identify(event.x, event.y)
         index = self.index("@%d,%d" % (event.x, event.y))
-
+        print(self.tab(index, "text"))  # получаем имя вкладки которую закрываем
+        # проверять по имени вкладки
         if "close" in element and self._active == index:
             self.forget(index)
             self.event_generate("<<NotebookTabClosed>>")

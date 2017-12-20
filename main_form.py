@@ -8,6 +8,7 @@ from UI_modules.custom_notebook import CustomNotebook
 from UI_modules.custom_tab import Tab
 from UI_modules.modal_window import ModalWindow
 from modules.saver import Saver
+from modules.list_of_tab import list_of_tab
 
 
 APP_WIDTH_WIN = 750
@@ -16,7 +17,7 @@ APP_HEIGHT = 400
 
 
 # список всех вкладок
-list_of_tab = []
+list_of_tab = list_of_tab
 
 
 # диалоговое окно открытия файла, возвращает путь к файлу
@@ -42,7 +43,7 @@ def save_all_file(tabs=list_of_tab):
 # обновление информации на всех вкладках
 def update_tabs():
     while True:
-        for line in list_of_tab:
+        for line in list_of_tab.get_all_tab():
             line.update_text()
         time.sleep(1)
 
@@ -52,10 +53,12 @@ def add_tab():
     file_path = path_to_file()
     if file_path:
         type_of_file = mimetypes.guess_type(file_path)
+
         if type_of_file[0]:
             type_of_file = type_of_file[0].split('/')[0]
+
         if type_of_file == 'text' or not type_of_file[0]:
-            list_of_tab.append(Tab(nb, file_path))
+            list_of_tab.add_tab(Tab(nb, file_path))
         else:
             file_name = file_path.split('/')[-1]
             modal_window = ModalWindow(file_name)
@@ -69,7 +72,7 @@ if os.name == 'posix':
     path_to_icon = ''
 else:
     app_width = APP_WIDTH_WIN
-    path_to_icon = 'icon.ico'
+    path_to_icon = 'icons\icon.ico'
     path_to_icon = os.path.join(os.getcwd(), path_to_icon)
 
 # здесь начинается описание UI
