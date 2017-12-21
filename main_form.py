@@ -29,13 +29,13 @@ def path_to_file():
     return op
 
 
-def save_file(tabs=list_of_tab):
+def save_file(tabs=list_of_tab.get_all_tab()):
     tab_name = nb.tab(nb.select(), 'text')
     saver = Saver(tabs, tab_name)
     saver.save_one()
 
 
-def save_all_file(tabs=list_of_tab):
+def save_all_file(tabs=list_of_tab.get_all_tab()):
     saver = Saver(tabs)
     saver.save_all()
 

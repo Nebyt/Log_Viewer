@@ -38,14 +38,19 @@ class CustomNotebook(ttk.Notebook):
 
         element = self.identify(event.x, event.y)
         index = self.index("@%d,%d" % (event.x, event.y))
-        print(self.tab(index, "text"))  # получаем имя вкладки которую закрываем
-        # проверять по имени вкладки
+        tab_name_for_delete = self.tab(index, "text")  # get name of closed tab
+
         if "close" in element and self._active == index:
             self.forget(index)
             self.event_generate("<<NotebookTabClosed>>")
 
         self.state(["!pressed"])
         self._active = None
+
+        for tab in list_of_tab.get_all_tab():
+            if tab.tab_name == tab_name_for_delete:
+                list_of_tab.remove_tab(tab)
+                break
 
     def __initialize_custom_style(self):
         style = ttk.Style()

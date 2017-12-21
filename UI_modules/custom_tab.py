@@ -3,6 +3,7 @@ import tkinter
 from tkinter import ttk
 import threading
 import time
+from modules.list_of_tab import list_of_tab
 
 
 class Tab:
@@ -12,8 +13,9 @@ class Tab:
         self.all_visible_text = ''
         self.document = Tail(file_path)  # создаем на вкладке объект документа, который читаем
         self.page = ttk.Frame(main_space)  # объект вкладка
-        self.tab_name = file_path.split('/')[-1]  # имя вкладки, берем последнее значение после разделения по символу /
+        self.__tab_name_expect = file_path.split('/')[-1]  # имя вкладки, берем последнее значение после разделения по символу /
 
+        self.tab_name = self.__set_tab_name(self.__tab_name_expect)
         self.scroll = tkinter.Scrollbar(self.page)  # объект скролбарр на вкладку
         self.txt = tkinter.Text(self.page, font="TextFont",
                                 spacing3=2, yscrollcommand=self.scroll.set)  # объект текстовое поле
@@ -33,6 +35,16 @@ class Tab:
         self.thread_show_last_string = threading.Thread(target=self.__shows_the_last_string,
                                                         daemon=True,
                                                         name='__watch_tail')  # поток для просмотра последней строки
+
+    def __set_tab_name(self, tab_name_expect):
+        self.__name, self.__file_fmt = tab_name_expect.split('.')
+        self.__all_tabs = list_of_tab.get_all_tab()
+        self.__count = 1
+        for tab in self.__all_tabs:
+            if tab.tab_name == tab_name_expect:
+                tab_name_expect = '{0}({1}).{2}'.format(self.__name, self.__count, self.__file_fmt)
+                self.__count += 1
+        return tab_name_expect
 
     def update_text(self):
         """Эта функция должна была обновлять текст на вкладке"""
