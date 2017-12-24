@@ -98,9 +98,8 @@ class Tab:
             if last_sym:
                 next_index = last_sym
                 self.txt.tag_add('red', first_sym, last_sym)
-                time.sleep(0.2)
             else:
-                time.sleep(0.7)
+                time.sleep(1)
 
     def get_all_text(self):
         self.all_visible_text = self.txt.get(1.0, tkinter.END)
