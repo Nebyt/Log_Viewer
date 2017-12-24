@@ -3,6 +3,7 @@ import sys
 import msvcrt
 import threading
 import os
+import random
 
 pressed_key = ''
 
@@ -20,6 +21,9 @@ th = threading.Thread(target=press_key,name=2)
 
 def fill_file():
     k = 1
+    words: list
+    with open('dict.txt', 'r') as dictionary:
+        words = dictionary.read().split('\n')
     for count in range(11):
         file_path = '{0}{1}{2}'.format(os.getcwd(), os.sep, 'test_{0}.log'.format(count))
         if not os.path.exists(r'{0}'.format(file_path)):
@@ -29,8 +33,12 @@ def fill_file():
                     sys.exit(0)
                 else:
                     with open('test_{0}.log'.format(count), 'a') as file:
-                        file.writelines('New string Новая строка {} лога\n'.format(k))
-                    print('New string Новая строка {} лог\n'.format(k))
+                        file.writelines('New string {0} {1} Новая строка {0} {2}\n'.format(k,
+                                                                                           random.choice(words),
+                                                                                           random.choice(words)))
+                    print('New string {0} {1} Новая строка {0} {2}\n'.format(k,
+                                                                                           random.choice(words),
+                                                                                           random.choice(words)))
                     k += 1
                 time.sleep(1)
         else:

@@ -1,0 +1,14 @@
+error
+Error
+warn
+Warning
+INFO
+info
+Info
+DEBUG
+Debug
+Left
+Right
+Up
+AND
+Down
