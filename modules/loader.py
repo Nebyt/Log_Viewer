@@ -20,10 +20,13 @@ class Tail:
     def get_lines(self):
         if not self.__fmt:
             self.__recognize_format(self.__path)
-        if self.__last_change <= self.__check_update():
+        if self.__last_change < self.__check_update():
             with open(r'{0}'.format(self.__path), 'r', encoding='{}'.format(self.__fmt), errors='replace') as file:
                 file.seek(self.__tail)
                 self.__log_content = file.read()
                 self.__tail = file.tell()
-        return self.__log_content
+            return self.__log_content
+        else:
+            self.__log_content = ''
+            return self.__log_content
 
