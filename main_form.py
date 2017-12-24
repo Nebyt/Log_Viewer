@@ -82,17 +82,19 @@ app_height = APP_HEIGHT
 start_pos_x = int(root.winfo_screenwidth() / 2) - int((app_width / 2))
 start_pos_y = int(root.winfo_screenheight() / 2.5) - int((app_height / 2))
 
-menubar = tkinter.Menu(root)
+menu_bar = tkinter.Menu(root, tearoff=False)
 save_button = tkinter.Menu(root)
 
-root.config(menu=menubar)
-menubar.add_command(label="Open..", command=add_tab)
-save_menu = tkinter.Menu(menubar)
+root.config(menu=menu_bar)
 
-save_menu.add_command(label='Save active', command=save_file)
-save_menu.add_command(label='Save all...', command=save_all_file)
-save_menu.add_separator()
-menubar.add_cascade(label='Save..', menu=save_menu)
+submenu = tkinter.Menu(menu_bar, tearoff=False)
+save_submenu = tkinter.Menu(submenu)
+
+menu_bar.add_cascade(label='File', menu=submenu)
+submenu.add_command(label="Open file", command=add_tab)
+submenu.add_cascade(label='Save..', menu=save_submenu)
+save_submenu.add_command(label='Save active', command=save_file)
+save_submenu.add_command(label='Save all...', command=save_all_file)
 
 # Defines and places the notebook widget
 nb = CustomNotebook(root)
