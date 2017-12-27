@@ -29,13 +29,15 @@ def path_to_file():
     return op
 
 
-def save_file(tabs=list_of_tab.get_all_tab()):
+def save_file(event=None):
+    tabs = list_of_tab.get_all_tab()
     tab_name = nb.tab(nb.select(), 'text')
     saver = Saver(tabs, tab_name)
     saver.save_one()
 
 
-def save_all_file(tabs=list_of_tab.get_all_tab()):
+def save_all_file(event=None):
+    tabs = list_of_tab.get_all_tab()
     saver = Saver(tabs)
     saver.save_all()
 
@@ -49,7 +51,7 @@ def update_tabs():
 
 
 # добавление вкладки
-def add_tab():
+def add_tab(event=None):
     file_path = path_to_file()
     if file_path:
         type_of_file = mimetypes.guess_type(file_path)
@@ -88,13 +90,16 @@ save_button = tkinter.Menu(root)
 root.config(menu=menu_bar)
 
 submenu = tkinter.Menu(menu_bar, tearoff=False)
-save_submenu = tkinter.Menu(submenu)
+save_submenu = tkinter.Menu(submenu, tearoff=False)
 
 menu_bar.add_cascade(label='File', menu=submenu)
 submenu.add_command(label="Open file", command=add_tab)
 submenu.add_cascade(label='Save..', menu=save_submenu)
 save_submenu.add_command(label='Save active', command=save_file)
 save_submenu.add_command(label='Save all...', command=save_all_file)
+root.bind('<Control-KeyPress-o>', add_tab)
+root.bind('<Control-KeyPress-s>', save_file)
+root.bind('<Control-Shift-KeyPress-S>', save_all_file)
 
 # Defines and places the notebook widget
 nb = CustomNotebook(root)
