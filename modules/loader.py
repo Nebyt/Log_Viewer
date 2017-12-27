@@ -18,15 +18,19 @@ class Tail:
         self.__fmt = codec.get_string_to_recognize(path_to_file)
 
     def get_lines(self):
+        last_processed_change = self.__last_change
+        file_last_change = os.stat(self.__path).st_mtime
         if not self.__fmt:
             self.__recognize_format(self.__path)
-        if self.__last_change < self.__check_update():
-            with open(r'{0}'.format(self.__path), 'r', encoding='{}'.format(self.__fmt), errors='replace') as file:
-                file.seek(self.__tail)
-                self.__log_content = file.read()
-                self.__tail = file.tell()
-            return self.__log_content
-        else:
-            self.__log_content = ''
-            return self.__log_content
+        if file_last_change > last_processed_change:
+            try:
+                with open(self.__path, 'r', encoding=self.__fmt, errors='replace') as file:
+                    file.seek(self.__tail)
+                    text = file.read()
+                    self.__tail = file.tell()
+                    self.__last_change = file_last_change
+                return text
+            except FileNotFoundError:
+                print('File not found!')
+        return ''
 
