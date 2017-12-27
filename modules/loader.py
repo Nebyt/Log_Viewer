@@ -10,10 +10,6 @@ class Tail:
         self.__log_content = ''
         self.__fmt = ''
 
-    def __check_update(self):
-        self.__last_change = os.stat(self.__path).st_mtime
-        return self.__last_change
-
     def __recognize_format(self, path_to_file):
         self.__fmt = codec.get_string_to_recognize(path_to_file)
 
