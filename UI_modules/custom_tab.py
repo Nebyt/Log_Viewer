@@ -4,6 +4,7 @@ from tkinter import ttk
 import threading
 import time
 from modules.list_of_tab import list_of_tab
+import random
 
 
 class Tab:
@@ -17,7 +18,11 @@ class Tab:
         self.__tab_name_expect = file_path.split('/')[-1]  # имя вкладки, берем последнее значение после разделения по символу /
 
         self.tab_name = self.__set_tab_name(self.__tab_name_expect)
-        self.txt = tkinter.Text(self.page, font="TextFont", spacing3=2)  # объект текстовое поле
+        self.txt = tkinter.Text(self.page,
+                                font="TextFont",
+                                spacing3=2,
+                                background="#696969",
+                                foreground="white")  # объект текстовое поле
         self.scroll = tkinter.Scrollbar(self.txt)  # объект скролбарр на вкладку
 
         self.txt.config(yscrollcommand=self.scroll.set)
@@ -27,6 +32,9 @@ class Tab:
         self.scroll.pack(side='right', fill=tkinter.Y)  # задаем размещение скроллбара
 
         self.txt.tag_config("red", background="red", foreground="white")
+        self.txt.tag_config("yellow", background="yellow", foreground="black")
+        self.txt.tag_config("blue", background="blue", foreground="black")
+        self.txt.tag_config("green", background="green", foreground="black")
 
         main_space.add(self.page, text='{}'.format(self.tab_name))  # добавляем вкладку
 
@@ -35,14 +43,17 @@ class Tab:
 
         self.txt.insert(tkinter.END, self.document.get_lines())  # вставляем текст из нашего документа
         self.txt.config(state='disabled')  # закрываем возможность редактировать
-        self.thread_highlight = threading.Thread(target=self.__highlight_word,
-                                                 args=['error', self.search_index],
-                                                 daemon=True,
-                                                 name='__highlight_red')  # поток для выделения текста
+
+        self.thread_highlight_red = threading.Thread(target=self.__highlight_word,
+                                                     args=['error', self.search_index],
+                                                     daemon=True,
+                                                     name='__highlight_red')  # поток для выделения текста
+
         self.thread_show_last_string = threading.Thread(target=self.__shows_the_last_string,
                                                         daemon=True,
                                                         name='__watch_tail')  # поток для просмотра последней строки
-        self.thread_highlight.start()
+
+        self.thread_highlight_red.start()
 
     def __set_tab_name(self, tab_name_expect):
         self.__name, self.__file_fmt = tab_name_expect.split('.')
@@ -93,11 +104,12 @@ class Tab:
 
     def __highlight_word(self, word, start_index):
         next_index = start_index
+        color_lib = ('red', 'yellow', 'blue', 'green')
         while True:
             first_sym, last_sym = self.__search_word(word, start_index=next_index)
             if last_sym:
                 next_index = last_sym
-                self.txt.tag_add('red', first_sym, last_sym)
+                self.txt.tag_add(random.choice(color_lib), first_sym, last_sym)
             else:
                 time.sleep(1)
 
