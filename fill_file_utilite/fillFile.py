@@ -1,6 +1,5 @@
 import time
 import sys
-import msvcrt
 import threading
 import os
 import random
@@ -9,11 +8,15 @@ pressed_key = ''
 
 
 def press_key():
-    while True:
-        pressed_key = msvcrt.getwch()
-        if pressed_key == 'q':
-            sys.exit()
-        time.sleep(0.5)
+    try:
+        import msvcrt
+        while True:
+            pressed_key = msvcrt.getwch()
+            if pressed_key == 'q':
+                sys.exit()
+            time.sleep(0.5)
+    except ImportError:
+        pass
 
 
 th = threading.Thread(target=press_key,name=2)
@@ -32,13 +35,11 @@ def fill_file():
                     print('Stop the script')
                     sys.exit(0)
                 else:
+                    w1 = random.choice(words)
+                    w2 = random.choice(words)
                     with open('test_{0}.log'.format(count), 'a') as file:
-                        file.writelines('New string {0} {1} Новая строка {0} {2}\n'.format(k,
-                                                                                           random.choice(words),
-                                                                                           random.choice(words)))
-                    print('New string {0} {1} Новая строка {0} {2}\n'.format(k,
-                                                                                           random.choice(words),
-                                                                                           random.choice(words)))
+                        file.writelines('New string {0} {1} Новая строка {0} {2}\n'.format(k, w1, w2))
+                    print('New string {0} {1} Новая строка {0} {2}\n'.format(k, w1, w2))
                     k += 1
                 time.sleep(1)
         else:
