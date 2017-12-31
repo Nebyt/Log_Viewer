@@ -1,12 +1,12 @@
 import tkinter
 from tkinter.filedialog import askopenfilename
+from tkinter import messagebox
 import time
 import threading
 import os
 import mimetypes
 from UI_modules.custom_notebook import CustomNotebook
 from UI_modules.custom_tab import Tab
-from UI_modules.modal_window import ModalWindow
 from modules.saver import Saver
 from modules.list_of_tab import list_of_tab
 
@@ -63,8 +63,7 @@ def add_tab(event=None):
             list_of_tab.add_tab(Tab(nb, file_path))
         else:
             file_name = file_path.split('/')[-1]
-            modal_window = ModalWindow(file_name)
-            modal_window.show()
+            messagebox.showinfo('Information', '{0} is not a text!'.format(file_name))
     else:
         return
 
