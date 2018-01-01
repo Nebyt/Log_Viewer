@@ -1,6 +1,7 @@
 from modules.loader import Tail
 import tkinter
 from tkinter import ttk
+from tkinter import BooleanVar
 import threading
 import time
 from modules.list_of_tab import list_of_tab
@@ -12,10 +13,11 @@ class Tab:
         self.main_foreground = 'white'
         self.main_background = '#696969'
         self.path_to_file = file_path
-        self.red_state = None
-        self.yellow_state = None
-        self.blue_state = None
-        self.green_state = None
+        self.error_state = BooleanVar()
+        self.warn_state = BooleanVar()
+        self.debug_state = BooleanVar()
+        self.info_state = BooleanVar()
+        self.custom_state = BooleanVar()
         self.__end = 0
         self.search_err_index = '1.0'
         self.search_warn_index = '1.0'
@@ -44,21 +46,38 @@ class Tab:
         self.scroll.config(command=self.txt.yview)  # прикрепляем скроллбар к текстовому полю
 
         self.bottom_frame.pack(side='bottom', fill=tkinter.X)
-        self.red_checkbox = tkinter.Checkbutton(self.bottom_frame, text='error', variable=self.red_state)
-        self.red_checkbox.pack(side='left')
-        self.red_checkbox = tkinter.Checkbutton(self.bottom_frame, text='warn', variable=self.yellow_state)
-        self.red_checkbox.pack(side='left')
-        self.red_checkbox = tkinter.Checkbutton(self.bottom_frame, text='debug', variable=self.blue_state)
-        self.red_checkbox.pack(side='left')
-        self.red_checkbox = tkinter.Checkbutton(self.bottom_frame, text='info', variable=self.green_state)
-        self.red_checkbox.pack(side='left')
+        self.error_checkbox = tkinter.Checkbutton(self.bottom_frame, text='error',
+                                                  variable=self.error_state,
+                                                  onvalue=True,
+                                                  offvalue=False,
+                                                  command=self.__highlight_error_starter)
+        self.error_checkbox.pack(side='left')
+        self.warn_checkbox = tkinter.Checkbutton(self.bottom_frame, text='warn',
+                                                 variable=self.warn_state,
+                                                 onvalue=True,
+                                                 offvalue=False,
+                                                 command=self.__highlight_warn_starter)
+        self.warn_checkbox.pack(side='left')
+        self.debug_checkbox = tkinter.Checkbutton(self.bottom_frame, text='debug',
+                                                  variable=self.debug_state,
+                                                  onvalue=True,
+                                                  offvalue=False,
+                                                  command=self.__highlight_debug_starter)
+        self.debug_checkbox.pack(side='left')
+        self.info_checkbox = tkinter.Checkbutton(self.bottom_frame, text='info',
+                                                 variable=self.info_state,
+                                                 onvalue=True,
+                                                 offvalue=False,
+                                                 command=self.__highlight_info_starter)
+        self.info_checkbox.pack(side='left')
+
         self.txt.pack(side='top', fill='both', expand=True)  # задаем размещение текстового поле
         self.scroll.pack(side='right', fill=tkinter.Y)  # задаем размещение скроллбара
 
-        self.txt.tag_config("error", background="red", foreground="white")
-        self.txt.tag_config("warn", background="yellow", foreground="black")
-        self.txt.tag_config("debug", background="blue", foreground="black")
-        self.txt.tag_config("info", background="green", foreground="black")
+        self.txt.tag_config("error", background="red", foreground="yellow")
+        self.txt.tag_config("warn", background="yellow", foreground="dodger blue")
+        self.txt.tag_config("debug", background="blue", foreground="white")
+        self.txt.tag_config("info", background="green2", foreground="blue")
         self.txt.tag_config("main", background=self.main_background, foreground=self.main_foreground)
 
         main_space.add(self.page, text='{}'.format(self.tab_name))  # добавляем вкладку
@@ -199,55 +218,85 @@ class Tab:
             next_start_index = ''
             return pos, next_start_index
 
+    def __highlight_error_starter(self):
+        if not self.thread_highlight_error.isAlive():
+            self.thread_highlight_error.start()
+
+    def __highlight_warn_starter(self):
+        if not self.thread_highlight_warn.isAlive():
+            self.thread_highlight_warn.start()
+
+    def __highlight_debug_starter(self):
+        if not self.thread_highlight_debug.isAlive():
+            self.thread_highlight_debug.start()
+
+    def __highlight_info_starter(self):
+        if not self.thread_highlight_info.isAlive():
+            self.thread_highlight_info.start()
+
+    def __highlight_word_starter(self):
+        if not self.thread_highlight_word.isAlive():
+            self.thread_highlight_word.start()
+
     def __highlight_error(self, word, start_index):
-        next_index = start_index
+        next_index = self.search_err_index
         while True:
-            first_sym, last_sym = self.__search_word(word, start_index=next_index)
-            if last_sym:
-                next_index = last_sym
-                self.txt.tag_add(word, first_sym, last_sym)
-            else:
-                time.sleep(1)
+            while self.error_state.get():
+                first_sym, last_sym = self.__search_error(word, start_index=next_index)
+                if last_sym:
+                    next_index = last_sym
+                    self.txt.tag_add(word, first_sym, last_sym)
+                else:
+                    time.sleep(1)
+            time.sleep(1)
 
     def __highlight_warn(self, word, start_index):
-        next_index = start_index
+        next_index = self.search_warn_index
         while True:
-            first_sym, last_sym = self.__search_warn(word, start_index=next_index)
-            if last_sym:
-                next_index = last_sym
-                self.txt.tag_add(word, first_sym, last_sym)
-            else:
-                time.sleep(1)
+            while self.warn_state.get():
+                first_sym, last_sym = self.__search_warn(word, start_index=next_index)
+                if last_sym:
+                    next_index = last_sym
+                    self.txt.tag_add(word, first_sym, last_sym)
+                else:
+                    time.sleep(1)
+            time.sleep(1)
 
     def __highlight_debug(self, word, start_index):
-        next_index = start_index
+        next_index = self.search_debug_index
         while True:
-            first_sym, last_sym = self.__search_debug(word, start_index=next_index)
-            if last_sym:
-                next_index = last_sym
-                self.txt.tag_add(word, first_sym, last_sym)
-            else:
-                time.sleep(1)
+            while self.debug_state.get():
+                first_sym, last_sym = self.__search_debug(word, start_index=next_index)
+                if last_sym:
+                    next_index = last_sym
+                    self.txt.tag_add(word, first_sym, last_sym)
+                else:
+                    time.sleep(1)
+            time.sleep(1)
 
     def __highlight_info(self, word, start_index):
-        next_index = start_index
+        next_index = self.search_info_index
         while True:
-            first_sym, last_sym = self.__search_info(word, start_index=next_index)
-            if last_sym:
-                next_index = last_sym
-                self.txt.tag_add(word, first_sym, last_sym)
-            else:
-                time.sleep(1)
+            while self.info_state.get():
+                first_sym, last_sym = self.__search_info(word, start_index=next_index)
+                if last_sym:
+                    next_index = last_sym
+                    self.txt.tag_add(word, first_sym, last_sym)
+                else:
+                    time.sleep(1)
+            time.sleep(1)
 
     def __highlight_word(self, word, start_index):
-        next_index = start_index
+        next_index = self.search_word_index
         while True:
-            first_sym, last_sym = self.__search_word(word, start_index=next_index)
-            if last_sym:
-                next_index = last_sym
-                self.txt.tag_add('main', first_sym, last_sym)
-            else:
-                time.sleep(1)
+            while self.custom_state.get():
+                first_sym, last_sym = self.__search_word(word, start_index=next_index)
+                if last_sym:
+                    next_index = last_sym
+                    self.txt.tag_add('main', first_sym, last_sym)
+                else:
+                    time.sleep(1)
+            time.sleep(1)
 
     def __unhighlight(self, tag_word, tag_dict):
         lenght_of_word = len(tag_word)

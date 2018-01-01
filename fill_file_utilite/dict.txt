@@ -12,3 +12,4 @@ Right
 Up
 AND
 Down
+debug
