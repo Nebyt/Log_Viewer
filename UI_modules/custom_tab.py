@@ -24,7 +24,7 @@ class Tab:
         self.search_debug_index = '1.0'
         self.search_info_index = '1.0'
         self.search_word_index = '1.0'
-        self.tags_dict = {'error':(), 'warn':(), 'debug':(), 'info':()}  # добавлять значение в словарь при поиске по слову кастомному
+        self.tags_dict = {'error':[], 'warn':[], 'debug':[], 'info':[]}  # добавлять значение в словарь при поиске по слову кастомному
         self.input_word = None
         self.all_visible_text = ''
         self.document = Tail(file_path)  # создаем на вкладке объект документа, который читаем
@@ -161,6 +161,7 @@ class Tab:
             new_sym = str(int(sym) + len(word))
             next_start_index = '{0}.{1}'.format(string, new_sym)
             self.search_err_index = next_start_index
+            self.tags_dict['error'].append(pos)
             return pos, next_start_index
         else:
             next_start_index = ''
@@ -248,6 +249,7 @@ class Tab:
                     self.txt.tag_add(word, first_sym, last_sym)
                 else:
                     time.sleep(1)
+            self.__unhighlight(word.lower(), self.tags_dict)
             time.sleep(1)
 
     def __highlight_warn(self, word, start_index):
@@ -260,6 +262,7 @@ class Tab:
                     self.txt.tag_add(word, first_sym, last_sym)
                 else:
                     time.sleep(1)
+            self.__unhighlight('warn', self.tags_dict)
             time.sleep(1)
 
     def __highlight_debug(self, word, start_index):
@@ -272,6 +275,7 @@ class Tab:
                     self.txt.tag_add(word, first_sym, last_sym)
                 else:
                     time.sleep(1)
+            self.__unhighlight('word', self.tags_dict)
             time.sleep(1)
 
     def __highlight_info(self, word, start_index):
@@ -301,8 +305,10 @@ class Tab:
     def __unhighlight(self, tag_word, tag_dict):
         lenght_of_word = len(tag_word)
         for position in tag_dict[tag_word]:
-            last_position = position + lenght_of_word
-            self.txt.tag_add("main", position, last_position)
+            string, sym = position.split('.')
+            last_symbol = str(int(sym) + lenght_of_word)
+            last_index = '{0}.{1}'.format(string, last_symbol)
+            self.txt.tag_add("main", position, last_index)
 
     def get_all_text(self):
         self.all_visible_text = self.txt.get(1.0, tkinter.END)

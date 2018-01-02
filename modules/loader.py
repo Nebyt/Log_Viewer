@@ -29,4 +29,3 @@ class Tail:
             except FileNotFoundError:
                 print('File not found!')
         return ''
-
