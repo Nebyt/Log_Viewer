@@ -154,7 +154,7 @@ class Tab:
 
     def __search_error(self, word, start_index):
         """Find first position of the word, from start position"""
-        pos = self.txt.search(word, start_index, tkinter.END)
+        pos = self.txt.search(word, start_index, tkinter.END, nocase=True)
         if pos:
             string, sym = pos.split('.')
             new_sym = str(int(sym) + len(word))
@@ -168,7 +168,7 @@ class Tab:
 
     def __search_warn(self, word, start_index):
         """Find first position of the word, from start position"""
-        pos = self.txt.search(word, start_index, tkinter.END)
+        pos = self.txt.search(word, start_index, tkinter.END, nocase=True)
         if pos:
             string, sym = pos.split('.')
             new_sym = str(int(sym) + len(word))
@@ -182,7 +182,7 @@ class Tab:
 
     def __search_debug(self, word, start_index):
         """Find first position of the word, from start position"""
-        pos = self.txt.search(word, start_index, tkinter.END)
+        pos = self.txt.search(word, start_index, tkinter.END, nocase=True)
         if pos:
             string, sym = pos.split('.')
             new_sym = str(int(sym) + len(word))
@@ -196,7 +196,7 @@ class Tab:
 
     def __search_info(self, word, start_index):
         """Find first position of the word, from start position"""
-        pos = self.txt.search(word, start_index, tkinter.END)
+        pos = self.txt.search(word, start_index, tkinter.END, nocase=True)
         if pos:
             string, sym = pos.split('.')
             new_sym = str(int(sym) + len(word))
@@ -210,7 +210,7 @@ class Tab:
 
     def __search_word(self, word, start_index):
         """Find first position of the word, from start position"""
-        pos = self.txt.search(word, start_index, tkinter.END)
+        pos = self.txt.search(word, start_index, tkinter.END, nocase=True)
         if pos:
             string, sym = pos.split('.')
             new_sym = str(int(sym) + len(word))
