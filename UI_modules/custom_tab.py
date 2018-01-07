@@ -44,31 +44,35 @@ class Tab:
         self.scroll = tkinter.Scrollbar(self.txt)  # объект скролбарр на текстовое поле
 
         self.txt.config(yscrollcommand=self.scroll.set)
-        self.scroll.config(command=self.txt.yview)  # прикрепляем скроллбар к текстовому полю
+        self.scroll.config(command=self.txt.yview, cursor='arrow')  # прикрепляем скроллбар к текстовому полю
 
         self.bottom_frame.pack(side='bottom', fill=tkinter.X)
-        self.error_checkbox = tkinter.Checkbutton(self.bottom_frame, text='error',
+        self.error_checkbox = tkinter.Checkbutton(self.bottom_frame, text='error', bd=4,
                                                   variable=self.error_state,
                                                   onvalue=True,
                                                   offvalue=False,
+                                                  font="TextFont 11",
                                                   command=self.__highlight_error_starter)
         self.error_checkbox.pack(side='left')
-        self.warn_checkbox = tkinter.Checkbutton(self.bottom_frame, text='warn',
+        self.warn_checkbox = tkinter.Checkbutton(self.bottom_frame, text='warn', bd=4,
                                                  variable=self.warn_state,
                                                  onvalue=True,
                                                  offvalue=False,
+                                                 font="TextFont 11",
                                                  command=self.__highlight_warn_starter)
         self.warn_checkbox.pack(side='left')
-        self.debug_checkbox = tkinter.Checkbutton(self.bottom_frame, text='debug',
+        self.debug_checkbox = tkinter.Checkbutton(self.bottom_frame, text='debug', bd=4,
                                                   variable=self.debug_state,
                                                   onvalue=True,
                                                   offvalue=False,
+                                                  font="TextFont 11",
                                                   command=self.__highlight_debug_starter)
         self.debug_checkbox.pack(side='left')
-        self.info_checkbox = tkinter.Checkbutton(self.bottom_frame, text='info',
+        self.info_checkbox = tkinter.Checkbutton(self.bottom_frame, text='info', bd=4,
                                                  variable=self.info_state,
                                                  onvalue=True,
                                                  offvalue=False,
+                                                 font="TextFont 11",
                                                  command=self.__highlight_info_starter)
         self.info_checkbox.pack(side='left')
 
