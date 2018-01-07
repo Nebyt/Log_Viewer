@@ -333,7 +333,6 @@ class Tab:
             last_symbol = str(int(sym) + length_of_word)
             last_index = '{0}.{1}'.format(string, last_symbol)
             self.txt.tag_add(word, position, last_index)
-            print(word, position, last_index)
         self.need_check[word] = False
 
     def get_all_text(self):
