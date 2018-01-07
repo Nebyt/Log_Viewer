@@ -24,7 +24,8 @@ class Tab:
         self.search_debug_index = '1.0'
         self.search_info_index = '1.0'
         self.search_word_index = '1.0'
-        self.tags_dict = {'error':[], 'warn':[], 'debug':[], 'info':[]}  # добавлять значение в словарь при поиске по слову кастомному
+        self.tags_dict = {'error': [], 'warn': [], 'debug': [], 'info': []}  # добавлять значение в словарь при поиске по слову кастомному
+        self.need_check = {'error': False, 'warn': False, 'debug': False, 'info': False}
         self.input_word = None
         self.all_visible_text = ''
         self.document = Tail(file_path)  # создаем на вкладке объект документа, который читаем
@@ -117,8 +118,6 @@ class Tab:
                                                         daemon=True,
                                                         name='watch_tail')  # поток для просмотра последней строки
 
-        #self.thread_highlight_error.start()
-
     def __set_tab_name(self, tab_name_expect):
         self.__name, self.__file_fmt = tab_name_expect.split('.')
         self.__all_tabs = list_of_tab.get_all_tab()
@@ -161,7 +160,7 @@ class Tab:
             new_sym = str(int(sym) + len(word))
             next_start_index = '{0}.{1}'.format(string, new_sym)
             self.search_err_index = next_start_index
-            self.tags_dict['error'].append(pos)
+            self.tags_dict[word].append(pos)
             return pos, next_start_index
         else:
             next_start_index = ''
@@ -175,6 +174,7 @@ class Tab:
             new_sym = str(int(sym) + len(word))
             next_start_index = '{0}.{1}'.format(string, new_sym)
             self.search_warn_index = next_start_index
+            self.tags_dict[word].append(pos)
             return pos, next_start_index
         else:
             next_start_index = ''
@@ -188,6 +188,7 @@ class Tab:
             new_sym = str(int(sym) + len(word))
             next_start_index = '{0}.{1}'.format(string, new_sym)
             self.search_debug_index = next_start_index
+            self.tags_dict[word].append(pos)
             return pos, next_start_index
         else:
             next_start_index = ''
@@ -201,6 +202,7 @@ class Tab:
             new_sym = str(int(sym) + len(word))
             next_start_index = '{0}.{1}'.format(string, new_sym)
             self.search_info_index = next_start_index
+            self.tags_dict[word].append(pos)
             return pos, next_start_index
         else:
             next_start_index = ''
@@ -214,6 +216,7 @@ class Tab:
             new_sym = str(int(sym) + len(word))
             next_start_index = '{0}.{1}'.format(string, new_sym)
             self.search_word_index = next_start_index
+            self.tags_dict[word].append(pos)
             return pos, next_start_index
         else:
             next_start_index = ''
@@ -240,75 +243,98 @@ class Tab:
             self.thread_highlight_word.start()
 
     def __highlight_error(self, word, start_index):
-        next_index = self.search_err_index
+        next_index = start_index
         while True:
             while self.error_state.get():
+                if self.need_check[word]:
+                    self.__highlight_again(word)
                 first_sym, last_sym = self.__search_error(word, start_index=next_index)
                 if last_sym:
                     next_index = last_sym
                     self.txt.tag_add(word, first_sym, last_sym)
                 else:
                     time.sleep(1)
-            self.__unhighlight(word.lower(), self.tags_dict)
+            self.__unhighlight(word.lower())
             time.sleep(1)
 
     def __highlight_warn(self, word, start_index):
-        next_index = self.search_warn_index
+        next_index = start_index
         while True:
             while self.warn_state.get():
+                if self.need_check[word]:
+                    self.__highlight_again(word)
                 first_sym, last_sym = self.__search_warn(word, start_index=next_index)
                 if last_sym:
                     next_index = last_sym
                     self.txt.tag_add(word, first_sym, last_sym)
                 else:
                     time.sleep(1)
-            self.__unhighlight('warn', self.tags_dict)
+            self.__unhighlight(word.lower())
             time.sleep(1)
 
     def __highlight_debug(self, word, start_index):
-        next_index = self.search_debug_index
+        next_index = start_index
         while True:
             while self.debug_state.get():
+                if self.need_check[word]:
+                    self.__highlight_again(word)
                 first_sym, last_sym = self.__search_debug(word, start_index=next_index)
                 if last_sym:
                     next_index = last_sym
                     self.txt.tag_add(word, first_sym, last_sym)
                 else:
                     time.sleep(1)
-            self.__unhighlight('word', self.tags_dict)
+            self.__unhighlight(word.lower())
             time.sleep(1)
 
     def __highlight_info(self, word, start_index):
-        next_index = self.search_info_index
+        next_index = start_index
         while True:
             while self.info_state.get():
+                if self.need_check[word]:
+                    self.__highlight_again(word)
                 first_sym, last_sym = self.__search_info(word, start_index=next_index)
                 if last_sym:
                     next_index = last_sym
                     self.txt.tag_add(word, first_sym, last_sym)
                 else:
                     time.sleep(1)
+            self.__unhighlight(word.lower())
             time.sleep(1)
 
     def __highlight_word(self, word, start_index):
-        next_index = self.search_word_index
+        next_index = start_index
         while True:
             while self.custom_state.get():
+                if self.need_check[word]:
+                    self.__highlight_again(word)
                 first_sym, last_sym = self.__search_word(word, start_index=next_index)
                 if last_sym:
                     next_index = last_sym
                     self.txt.tag_add('main', first_sym, last_sym)
                 else:
                     time.sleep(1)
+            self.__unhighlight(word.lower())
             time.sleep(1)
 
-    def __unhighlight(self, tag_word, tag_dict):
+    def __unhighlight(self, tag_word):
         lenght_of_word = len(tag_word)
-        for position in tag_dict[tag_word]:
+        for position in self.tags_dict[tag_word]:
             string, sym = position.split('.')
             last_symbol = str(int(sym) + lenght_of_word)
             last_index = '{0}.{1}'.format(string, last_symbol)
-            self.txt.tag_add("main", position, last_index)
+            self.txt.tag_remove(tag_word, position, last_index)
+        self.need_check[tag_word] = True
+
+    def __highlight_again(self, word):
+        length_of_word = len(word)
+        for position in self.tags_dict[word]:
+            string, sym = position.split('.')
+            last_symbol = str(int(sym) + length_of_word)
+            last_index = '{0}.{1}'.format(string, last_symbol)
+            self.txt.tag_add(word, position, last_index)
+            print(word, position, last_index)
+        self.need_check[word] = False
 
     def get_all_text(self):
         self.all_visible_text = self.txt.get(1.0, tkinter.END)
