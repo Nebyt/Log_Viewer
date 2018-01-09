@@ -1,7 +1,7 @@
 import tkinter
 from tkinter import ttk
 from modules.list_of_tab import list_of_tab
-
+import logging
 
 class CustomNotebook(ttk.Notebook):
     """A ttk Notebook with close buttons on each tab"""
@@ -50,6 +50,7 @@ class CustomNotebook(ttk.Notebook):
         for tab in list_of_tab.get_all_tab():
             if tab.tab_name == tab_name_for_delete:
                 list_of_tab.remove_tab(tab)
+                logging.debug('Tab %s closed', tab.tab_name)
                 break
 
     def __initialize_custom_style(self):

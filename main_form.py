@@ -9,7 +9,12 @@ from UI_modules.custom_notebook import CustomNotebook
 from UI_modules.custom_tab import Tab
 from modules.saver import Saver
 from modules.list_of_tab import list_of_tab
+import logging
 
+
+logging.basicConfig(format='%(asctime)s:[%(levelname)s] %(message)s',
+                    filename='logviewer_debug.log',
+                    level=logging.DEBUG)
 
 APP_WIDTH_WIN = 750
 APP_WIDTH_LINUX = 825
@@ -32,12 +37,14 @@ def path_to_file():
 def save_file(event=None):
     tabs = list_of_tab.get_all_tab()
     tab_name = nb.tab(nb.select(), 'text')
+    logging.debug('Save file %s', tab_name)
     saver = Saver(tabs, tab_name)
     saver.save_one()
 
 
 def save_all_file(event=None):
     tabs = list_of_tab.get_all_tab()
+    logging.debug('Save all files', tabs)
     saver = Saver(tabs)
     saver.save_all()
 
@@ -61,20 +68,25 @@ def add_tab(event=None):
 
         if type_of_file == 'text' or not type_of_file[0]:
             list_of_tab.add_tab(Tab(nb, file_path))
+            logging.debug('Added tab for file %s', file_path)
+
         else:
             file_name = file_path.split('/')[-1]
+            logging.warning('%s is not a text', file_name)
             messagebox.showinfo('Information', '{0} is not a text!'.format(file_name))
     else:
         return
 
-
+logging.debug('-------------------Programm start-------------------')
 if os.name == 'posix':
+    logging.debug('This is Linux OS')
     app_width = APP_WIDTH_LINUX
     path_to_icon = ''
 else:
+    logging.debug('This is Windows OS')
     app_width = APP_WIDTH_WIN
-    path_to_icon = 'icons\icon.ico'
-    path_to_icon = os.path.join(os.getcwd(), path_to_icon)
+    icon = 'icons\icon.ico'
+    path_to_icon = os.path.join(os.getcwd(), icon)
 
 # здесь начинается описание UI
 root = tkinter.Tk()
@@ -116,3 +128,4 @@ root.geometry('{0}x{1}'.format(app_width, app_height))
 root.minsize(app_width, app_height)
 root.geometry('+{0}+{1}'.format(start_pos_x, start_pos_y))
 root.mainloop()  # запуск отрисовки UI
+logging.debug('-------------------Programm close-------------------')

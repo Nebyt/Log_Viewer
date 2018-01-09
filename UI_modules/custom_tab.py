@@ -5,7 +5,7 @@ from tkinter import BooleanVar
 import threading
 import time
 from modules.list_of_tab import list_of_tab
-import random
+import logging
 
 
 class Tab:

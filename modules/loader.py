@@ -1,5 +1,6 @@
 import os
 import modules.recognize_codec as codec
+import logging
 
 
 class Tail:
@@ -11,7 +12,9 @@ class Tail:
         self.__fmt = ''
 
     def __recognize_format(self, path_to_file):
+        logging.info('Try to recognize file codec')
         self.__fmt = codec.get_string_to_recognize(path_to_file)
+        logging.info("File's codec is %s", self.__fmt)
 
     def get_lines(self):
         last_processed_change = self.__last_change
@@ -27,5 +30,6 @@ class Tail:
                     self.__last_change = file_last_change
                 return text
             except FileNotFoundError:
+                logging.error('File not found!')
                 print('File not found!')
         return ''
