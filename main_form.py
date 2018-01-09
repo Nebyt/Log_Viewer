@@ -37,14 +37,12 @@ def path_to_file():
 def save_file(event=None):
     tabs = list_of_tab.get_all_tab()
     tab_name = nb.tab(nb.select(), 'text')
-    logging.debug('Save file %s', tab_name)
     saver = Saver(tabs, tab_name)
     saver.save_one()
 
 
 def save_all_file(event=None):
     tabs = list_of_tab.get_all_tab()
-    logging.debug('Save all files', tabs)
     saver = Saver(tabs)
     saver.save_all()
 

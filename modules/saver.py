@@ -23,6 +23,7 @@ class Saver:
         self.path_to_save = asksaveasfilename(title='Save archive', initialfile='{}.zip'.format(current_moment),
                                               filetypes=(("ZIP File", "*.zip"), ("All files", "*.*")))
         if self.path_to_save:
+            logging.debug('Save all files')
             logging.debug('Path to save %s', self.path_to_save)
             with zipfile.ZipFile('{}'.format(self.path_to_save),'a',
                                  compression=zipfile.ZIP_STORED,
@@ -51,6 +52,7 @@ class Saver:
                                                                  ("Text File", "*.txt"),
                                                                  ("All files", "*.*")))
                 if self.path_to_save:
+                    logging.debug('Save file %s', tab.tab_name)
                     logging.debug('Path to save %s', self.path_to_save)
                     with open(self.path_to_save, 'w') as file:
                         file.write(self.current_tab_text)
