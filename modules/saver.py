@@ -2,6 +2,7 @@ import zipfile
 import os
 from tkinter.filedialog import asksaveasfilename
 from datetime import datetime
+import logging
 
 
 class Saver:
@@ -22,17 +23,21 @@ class Saver:
         self.path_to_save = asksaveasfilename(title='Save archive', initialfile='{}.zip'.format(current_moment),
                                               filetypes=(("ZIP File", "*.zip"), ("All files", "*.*")))
         if self.path_to_save:
+            logging.debug('Path to save %s', self.path_to_save)
             with zipfile.ZipFile('{}'.format(self.path_to_save),'a',
                                  compression=zipfile.ZIP_STORED,
                                  allowZip64=True) as my_zip:
                 for tab in self.all_tabs:
+                    logging.debug('Added file %s to archive', tab.tab_name)
                     self.current_tab_text = tab.get_all_text()
                     tmp_file = tab.tab_name
                     with open(tmp_file, 'w') as file:
                         file.write(self.current_tab_text)
                     my_zip.write(tmp_file)
                     os.remove(tmp_file)
+            logging.debug('Packing finished')
         else:
+            logging.debug('Path to save not set')
             return
 
     def save_one(self):
@@ -46,7 +51,10 @@ class Saver:
                                                                  ("Text File", "*.txt"),
                                                                  ("All files", "*.*")))
                 if self.path_to_save:
-                    with open(tmp_file, 'w') as file:
+                    logging.debug('Path to save %s', self.path_to_save)
+                    with open(self.path_to_save, 'w') as file:
                         file.write(self.current_tab_text)
+                    logging.debug('File %s saved to %s', tab.tab_name, self.path_to_save)
                 else:
+                    logging.debug('Path to save not set')
                     return
