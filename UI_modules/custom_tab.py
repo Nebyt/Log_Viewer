@@ -1,7 +1,7 @@
 from modules.loader import Tail
 import tkinter
 from tkinter import ttk
-from tkinter import BooleanVar
+from tkinter import BooleanVar, StringVar
 import threading
 import time
 from modules.list_of_tab import list_of_tab
@@ -18,6 +18,8 @@ class Tab:
         self.debug_state = BooleanVar()
         self.info_state = BooleanVar()
         self.custom_state = BooleanVar()
+        self.word_highlight_state = BooleanVar()
+        self.word_filter_state = BooleanVar()
         self.__end = 0
         self.search_err_index = '1.0'
         self.search_warn_index = '1.0'
@@ -26,7 +28,7 @@ class Tab:
         self.search_word_index = '1.0'
         self.tags_dict = {'error': [], 'warn': [], 'debug': [], 'info': []}  # добавлять значение в словарь при поиске по слову кастомному
         self.need_check = {'error': False, 'warn': False, 'debug': False, 'info': False}
-        self.input_word = None
+        self.input_word = StringVar()
         self.all_visible_text = ''
         self.document = Tail(file_path)  # создаем на вкладке объект документа, который читаем
 
@@ -47,34 +49,50 @@ class Tab:
         self.scroll.config(command=self.txt.yview, cursor='arrow')  # прикрепляем скроллбар к текстовому полю
 
         self.bottom_frame.pack(side='bottom', fill=tkinter.X)
-        self.error_checkbox = tkinter.Checkbutton(self.bottom_frame, text='error', bd=4,
+        self.error_checkbox = tkinter.Checkbutton(self.bottom_frame, text='Error', bd=4,
                                                   variable=self.error_state,
                                                   onvalue=True,
                                                   offvalue=False,
                                                   font="TextFont 11",
                                                   command=self.__highlight_error_starter)
         self.error_checkbox.pack(side='left')
-        self.warn_checkbox = tkinter.Checkbutton(self.bottom_frame, text='warn', bd=4,
+        self.warn_checkbox = tkinter.Checkbutton(self.bottom_frame, text='Warn', bd=4,
                                                  variable=self.warn_state,
                                                  onvalue=True,
                                                  offvalue=False,
                                                  font="TextFont 11",
                                                  command=self.__highlight_warn_starter)
         self.warn_checkbox.pack(side='left')
-        self.debug_checkbox = tkinter.Checkbutton(self.bottom_frame, text='debug', bd=4,
+        self.debug_checkbox = tkinter.Checkbutton(self.bottom_frame, text='Debug', bd=4,
                                                   variable=self.debug_state,
                                                   onvalue=True,
                                                   offvalue=False,
                                                   font="TextFont 11",
                                                   command=self.__highlight_debug_starter)
         self.debug_checkbox.pack(side='left')
-        self.info_checkbox = tkinter.Checkbutton(self.bottom_frame, text='info', bd=4,
+        self.info_checkbox = tkinter.Checkbutton(self.bottom_frame, text='Info', bd=4,
                                                  variable=self.info_state,
                                                  onvalue=True,
                                                  offvalue=False,
                                                  font="TextFont 11",
                                                  command=self.__highlight_info_starter)
         self.info_checkbox.pack(side='left')
+        self.input_field = tkinter.Entry(self.bottom_frame, bd=4, textvariable=self.input_word, width=20)
+        self.input_field.pack(side='right')
+        self.word_highlight_checkbox = tkinter.Checkbutton(self.bottom_frame, text='Highlight word', bd=4,
+                                                 variable=self.word_highlight_state,
+                                                 onvalue=True,
+                                                 offvalue=False,
+                                                 font="TextFont 11",
+                                                 command=self.__highlight_info_starter)
+        self.word_highlight_checkbox.pack(side='right')
+        self.word_filter_checkbox = tkinter.Checkbutton(self.bottom_frame, text='Filter by word', bd=4,
+                                                 variable=self.word_filter_state,
+                                                 onvalue=True,
+                                                 offvalue=False,
+                                                 font="TextFont 11",
+                                                 command=self.__highlight_info_starter)
+        self.word_filter_checkbox.pack(side='right')
 
         self.txt.pack(side='top', fill='both', expand=True)  # задаем размещение текстового поле
         self.scroll.pack(side='right', fill=tkinter.Y)  # задаем размещение скроллбара
@@ -151,10 +169,12 @@ class Tab:
         self.__end = 1
         if not self.thread_show_last_string.isAlive():
             self.thread_show_last_string.start()
+            logging.debug('Start thread to watch tail of file %s', self.__tab_name_expect)
 
     def __stop_watch_tail(self, event):
         """останавливаем цикл, который постоянно мониторит последнюю строку"""
         self.__end = 0
+        logging.debug('Pause thread to watch tail of file %s', self.__tab_name_expect)
 
     def __search_error(self, word, start_index):
         """Find first position of the word, from start position"""
@@ -229,18 +249,22 @@ class Tab:
     def __highlight_error_starter(self):
         if not self.thread_highlight_error.isAlive():
             self.thread_highlight_error.start()
+            logging.debug('Start thread to watch ERROR of file %s', self.__tab_name_expect)
 
     def __highlight_warn_starter(self):
         if not self.thread_highlight_warn.isAlive():
             self.thread_highlight_warn.start()
+            logging.debug('Start thread to watch WARNING of file %s', self.__tab_name_expect)
 
     def __highlight_debug_starter(self):
         if not self.thread_highlight_debug.isAlive():
             self.thread_highlight_debug.start()
+            logging.debug('Start thread to watch DEBUG of file %s', self.__tab_name_expect)
 
     def __highlight_info_starter(self):
         if not self.thread_highlight_info.isAlive():
             self.thread_highlight_info.start()
+            logging.debug('Start thread to watch INFO of file %s', self.__tab_name_expect)
 
     def __highlight_word_starter(self):
         if not self.thread_highlight_word.isAlive():
@@ -322,13 +346,15 @@ class Tab:
             time.sleep(1)
 
     def __unhighlight(self, tag_word):
-        lenght_of_word = len(tag_word)
-        for position in self.tags_dict[tag_word]:
-            string, sym = position.split('.')
-            last_symbol = str(int(sym) + lenght_of_word)
-            last_index = '{0}.{1}'.format(string, last_symbol)
-            self.txt.tag_remove(tag_word, position, last_index)
-        self.need_check[tag_word] = True
+        if not self.need_check[tag_word]:
+            logging.debug('Unhighlighte %s of file %s', tag_word, self.__tab_name_expect)
+            length_of_word = len(tag_word)
+            for position in self.tags_dict[tag_word]:
+                string, sym = position.split('.')
+                last_symbol = str(int(sym) + length_of_word)
+                last_index = '{0}.{1}'.format(string, last_symbol)
+                self.txt.tag_remove(tag_word, position, last_index)
+            self.need_check[tag_word] = True
 
     def __highlight_again(self, word):
         length_of_word = len(word)
