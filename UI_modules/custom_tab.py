@@ -27,6 +27,7 @@ class Tab:
         self.search_word_index = '1.0'
         self.tags_dict = {'error': [], 'warn': [], 'debug': [], 'info': []}  # добавлять значение в словарь при поиске по слову кастомному
         self.need_check = {'error': False, 'warn': False, 'debug': False, 'info': False}
+        self.standart_word = ('error', 'warn', 'debug', 'info')
         self.input_word = StringVar()
         self.all_visible_text = ''
         self.document = Tail(file_path)  # создаем на вкладке объект документа, который читаем
@@ -341,7 +342,7 @@ class Tab:
     def __highlight_word(self, start_index):
         next_index = start_index
         while True:
-            word = self.input_word.get()  # проблема
+            word = self.input_word.get().strip().lower()  # проблема
             while self.word_highlight_state.get():
                 self.input_field.config(state='disabled')
                 if word not in self.need_check.keys():
@@ -360,12 +361,11 @@ class Tab:
             time.sleep(1)
 
     def __unhighlight(self, tag_word):
-        standart_word = ('error', 'warn', 'debug', 'info')
         try:
             if not self.need_check[tag_word]:
                 logging.debug('Unhighlight %s of file %s', tag_word, self.__tab_name_expect)
                 length_of_word = len(tag_word)
-                if tag_word.lower() not in standart_word:
+                if tag_word.lower() not in self.standart_word:
                     tag = 'custom'
                 else:
                     tag = tag_word
@@ -380,11 +380,15 @@ class Tab:
 
     def __highlight_again(self, word):
         length_of_word = len(word)
+        if word not in self.standart_word:
+            tag = 'custom'
+        else:
+            tag = word
         for position in self.tags_dict[word]:
             string, sym = position.split('.')
             last_symbol = str(int(sym) + length_of_word)
             last_index = '{0}.{1}'.format(string, last_symbol)
-            self.txt.tag_add(word, position, last_index)
+            self.txt.tag_add(tag, position, last_index)
         self.need_check[word] = False
 
     def get_all_text(self):
