@@ -17,18 +17,15 @@ class Saver:
         self.path_to_save = ''
 
     def save_all(self):
-        # get current time
+        # получаем текущее время
         current_moment = datetime.now().strftime('%Y%m%d_%H%M%S')
-        # set the save path
+        # получаем путь для сохранения
         self.path_to_save = asksaveasfilename(title='Save archive', initialfile='{}.zip'.format(current_moment),
                                               filetypes=(("ZIP File", "*.zip"), ("All files", "*.*")))
         if self.path_to_save:
             logging.debug('Save all files')
             logging.debug('Path to save %s', self.path_to_save)
-            #logging.debug('Rights to write to %s : %s', self.path_to_save, os.access(self.path_to_save, os.W_OK))
-            with zipfile.ZipFile('{}'.format(self.path_to_save),'a',
-                                 compression=zipfile.ZIP_STORED,
-                                 allowZip64=True) as my_zip:
+            with zipfile.ZipFile(self.path_to_save, 'a', compression=zipfile.ZIP_STORED, allowZip64=True) as my_zip:
                 for tab in self.all_tabs:
                     logging.debug('Added file %s to archive', tab.tab_name)
                     self.current_tab_text = tab.get_all_text()
@@ -55,7 +52,6 @@ class Saver:
                 if self.path_to_save:
                     logging.debug('Save file %s', tab.tab_name)
                     logging.debug('Path to save %s', self.path_to_save)
-                    #logging.debug('Rights to write to %s : %s', self.path_to_save,os.access(self.path_to_save, os.W_OK))
                     with open(self.path_to_save, 'w') as file:
                         file.write(self.current_tab_text)
                     logging.debug('File %s saved to %s', tab.tab_name, self.path_to_save)

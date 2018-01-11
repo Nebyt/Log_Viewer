@@ -34,6 +34,7 @@ def path_to_file():
     return op
 
 
+# функция сохранения активной вкладки
 def save_file(event=None):
     tabs = list_of_tab.get_all_tab()
     tab_name = nb.tab(nb.select(), 'text')
@@ -41,6 +42,7 @@ def save_file(event=None):
     saver.save_one()
 
 
+# функция сохранения всех вкладок
 def save_all_file(event=None):
     tabs = list_of_tab.get_all_tab()
     saver = Saver(tabs)
@@ -50,8 +52,8 @@ def save_all_file(event=None):
 # обновление информации на всех вкладках
 def update_tabs():
     while True:
-        for line in list_of_tab.get_all_tab():
-            line.update_text()
+        for tab in list_of_tab.get_all_tab():
+            tab.update_text()
         time.sleep(1)
 
 
@@ -74,6 +76,7 @@ def add_tab(event=None):
             messagebox.showinfo('Information', '{0} is not a text!'.format(file_name))
     else:
         return
+
 
 logging.debug('-------------------Programm start-------------------')
 if os.name == 'posix':
@@ -110,11 +113,10 @@ root.bind('<Control-KeyPress-o>', add_tab)
 root.bind('<Control-KeyPress-s>', save_file)
 root.bind('<Control-Shift-KeyPress-S>', save_all_file)
 
-# Defines and places the notebook widget
+# Определение и расположение на форме виджета Блокнот
 nb = CustomNotebook(root)
 nb.pack(fill='both', expand='yes')
 # здесь заканчивается описание UI
-
 
 # поток для обновления вкладок
 thread_update_tabs = threading.Thread(target=update_tabs, daemon=True, name='update_tabs')
@@ -122,8 +124,10 @@ thread_update_tabs.start()
 
 root.title('LogViewer')
 root.iconbitmap(path_to_icon)
-root.geometry('{0}x{1}'.format(app_width, app_height))
 root.minsize(app_width, app_height)
+root.geometry('{0}x{1}'.format(app_width, app_height))
 root.geometry('+{0}+{1}'.format(start_pos_x, start_pos_y))
-root.mainloop()  # запуск отрисовки UI
+
+# запуск отрисовки UI
+root.mainloop()
 logging.debug('-------------------Programm close-------------------')

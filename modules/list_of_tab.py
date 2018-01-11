@@ -1,4 +1,5 @@
 class ListOfTab:
+    # Необходимо для управления вкладками
     def __init__(self):
         self.__list_of_tab = []
 

@@ -12,11 +12,13 @@ class Tail:
         self.__fmt = ''
 
     def __recognize_format(self, path_to_file):
+        # Пробуем угадать кодировку файла
         logging.info('Try to recognize file codec')
         self.__fmt = codec.get_string_to_recognize(path_to_file)
         logging.info("File's codec is %s", self.__fmt)
 
     def get_lines(self):
+        # Читаем файл, если файл изменялся после нашего последнего чтения
         last_processed_change = self.__last_change
         file_last_change = os.stat(self.__path).st_mtime
         if not self.__fmt:
