@@ -296,7 +296,9 @@ class Tab:
         # Запуск потока для поиска и выделения заданного слова
         if not self.thread_highlight_word.isAlive():
             self.thread_highlight_word.start()
-            logging.debug('Start thread to watch custom word in file %s', self.__tab_name_expect)
+            logging.debug('Start thread to watch "%s" word in file %s',
+                          self.input_word.get().strip(),
+                          self.__tab_name_expect)
 
     def __highlight_error(self, word, start_index):
         # Выделение найденного ERROR
@@ -393,7 +395,7 @@ class Tab:
         # Удаляем тэги
         try:
             if not self.need_check[tag_word]:
-                logging.debug('Unhighlight %s of file %s', tag_word, self.__tab_name_expect)
+                logging.debug('Unhighlight "%s" word in file %s', tag_word, self.__tab_name_expect)
                 length_of_word = len(tag_word)
                 if tag_word.lower() not in self.standart_word:
                     tag = 'custom'
