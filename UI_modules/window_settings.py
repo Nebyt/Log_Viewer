@@ -99,7 +99,7 @@ class WindowSetting:
             else:
                 print(event.keysym)
                 return 'break'
-        elif event.keysym in ('BackSpace', 'Left', 'Right', 'Tab'):
+        elif event.keysym in ('BackSpace', 'Left', 'Right', 'Tab', 'Del'):
             pass
         else:
             return 'break'
