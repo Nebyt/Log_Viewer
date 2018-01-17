@@ -6,6 +6,7 @@ import threading
 import time
 from modules.list_of_tab import list_of_tab
 import logging
+from UI_modules.window_settings import WindowSetting
 
 
 class Tab:
@@ -44,8 +45,8 @@ class Tab:
         self.__tab_name_expect = file_path.split('/')[-1]
         self.tab_name = self.__set_tab_name(self.__tab_name_expect)
         self.txt = tkinter.Text(self.page,
-                                font="TextFont",
-                                spacing3=2,
+                                font=('{0} {1}'.format(WindowSetting.font_family, WindowSetting.font_size)),
+                                spacing3=WindowSetting.spacing_btwn_str,
                                 background=self.main_background,
                                 foreground=self.main_foreground,
                                 cursor='arrow')
@@ -428,3 +429,6 @@ class Tab:
         # Возвращем весь текст со вкладки
         self.all_visible_text = self.txt.get(1.0, tkinter.END)
         return self.all_visible_text
+
+    def change_font(self, font, size, spacing):
+        self.txt.config(font=('{0} {1}'.format(font, size)), spacing3=int(spacing))

@@ -5,11 +5,12 @@ import time
 import threading
 import os
 import mimetypes
+import logging
 from UI_modules.custom_notebook import CustomNotebook
 from UI_modules.custom_tab import Tab
+from UI_modules.window_settings import WindowSetting
 from modules.saver import Saver
 from modules.list_of_tab import list_of_tab
-import logging
 
 
 logging.basicConfig(format='%(asctime)s:[%(levelname)s] %(message)s',
@@ -78,6 +79,10 @@ def add_tab(event=None):
         return
 
 
+def window_settings(event=None):
+    window = WindowSetting()
+    window.show()
+
 logging.debug('-------------------Programm start-------------------')
 if os.name == 'posix':
     logging.debug('This is Linux OS')
@@ -109,6 +114,9 @@ submenu.add_command(label="Open file", command=add_tab)
 submenu.add_cascade(label='Save..', menu=save_submenu)
 save_submenu.add_command(label='Save active', command=save_file)
 save_submenu.add_command(label='Save all...', command=save_all_file)
+
+menu_bar.add_command(label='Settings..', command=window_settings)
+
 root.bind('<Control-KeyPress-o>', add_tab)
 root.bind('<Control-KeyPress-s>', save_file)
 root.bind('<Control-Shift-KeyPress-S>', save_all_file)
