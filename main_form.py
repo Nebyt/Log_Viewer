@@ -1,9 +1,13 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import tkinter
 from tkinter.filedialog import askopenfilename
 from tkinter import messagebox
 import time
 import threading
 import os
+import gc
 import mimetypes
 import logging
 from UI_modules.custom_notebook import CustomNotebook
@@ -136,6 +140,7 @@ root.minsize(app_width, app_height)
 root.geometry('{0}x{1}'.format(app_width, app_height))
 root.geometry('+{0}+{1}'.format(start_pos_x, start_pos_y))
 
+gc.enable()
 # запуск отрисовки UI
 root.mainloop()
 logging.debug('-------------------Programm close-------------------')
