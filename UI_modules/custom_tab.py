@@ -1,3 +1,6 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from modules.loader import Tail
 import tkinter
 from tkinter import ttk
@@ -31,6 +34,7 @@ class Tab:
         self.standart_word = ('error', 'warn', 'debug', 'info')
         self.input_word = StringVar()
         self.all_visible_text = ''
+        self.all_threads = []
 
         # создаем на вкладке объект документа, который читаем
         self.document = Tail(file_path)
@@ -83,8 +87,10 @@ class Tab:
                                                  font="TextFont 11",
                                                  command=self.__highlight_info_starter)
         self.info_checkbox.pack(side='left')
-        self.input_field = tkinter.Entry(self.bottom_frame, bd=4, textvariable=self.input_word, width=20)
-        self.input_field.pack(side='right')
+        self.input_field = tkinter.Entry(self.bottom_frame, bd=3, textvariable=self.input_word)
+        self.input_field.pack(side='right', fill=tkinter.X, expand=True)
+        self.input_field.bind('<KeyPress>', self.__key_check)
+
         self.word_highlight_checkbox = tkinter.Checkbutton(self.bottom_frame, text='Highlight word', bd=4,
                                                            variable=self.word_highlight_state,
                                                            onvalue=True,
@@ -167,9 +173,13 @@ class Tab:
 
     def update_text(self):
         # Эта функция обновляет текст на вкладке
-        self.txt.config(state='normal')
-        self.txt.insert(tkinter.END, self.document.get_lines())
-        self.txt.config(state='disabled')
+        try:
+            self.txt.config(state='normal')
+            self.txt.insert(tkinter.END, self.document.get_lines())
+            self.txt.config(state='disabled')
+        except tkinter.TclError:
+            logging.warning('The tab is already closed')
+            pass
 
     def __shows_the_last_string(self):
         # На постоянке крутиться проверка для перехода к концу отображаемого
@@ -184,6 +194,7 @@ class Tab:
         self.__end = 1
         if not self.thread_show_last_string.isAlive():
             self.thread_show_last_string.start()
+            self.all_threads.append(self.thread_show_last_string)
             logging.debug('Start thread to watch tail of file %s', self.__tab_name_expect)
 
     def __stop_watch_tail(self, event):
@@ -273,30 +284,35 @@ class Tab:
         # Запуск потока для поиска и выделения слова ERROR
         if not self.thread_highlight_error.isAlive():
             self.thread_highlight_error.start()
+            self.all_threads.append(self.thread_highlight_error)
             logging.debug('Start thread to watch ERROR of file %s', self.__tab_name_expect)
 
     def __highlight_warn_starter(self):
         # Запуск потока для поиска и выделения слова WARN
         if not self.thread_highlight_warn.isAlive():
             self.thread_highlight_warn.start()
+            self.all_threads.append(self.thread_highlight_warn)
             logging.debug('Start thread to watch WARNING of file %s', self.__tab_name_expect)
 
     def __highlight_debug_starter(self):
         # Запуск потока для поиска и выделения слова DEBUG
         if not self.thread_highlight_debug.isAlive():
             self.thread_highlight_debug.start()
+            self.all_threads.append(self.thread_highlight_debug)
             logging.debug('Start thread to watch DEBUG of file %s', self.__tab_name_expect)
 
     def __highlight_info_starter(self):
         # Запуск потока для поиска и выделения слова INFO
         if not self.thread_highlight_info.isAlive():
             self.thread_highlight_info.start()
+            self.all_threads.append(self.thread_highlight_info)
             logging.debug('Start thread to watch INFO of file %s', self.__tab_name_expect)
 
     def __highlight_word_starter(self):
         # Запуск потока для поиска и выделения заданного слова
         if not self.thread_highlight_word.isAlive():
             self.thread_highlight_word.start()
+            self.all_threads.append(self.thread_highlight_word)
             logging.debug('Start thread to watch "%s" word in file %s',
                           self.input_word.get().strip(),
                           self.__tab_name_expect)
@@ -432,3 +448,20 @@ class Tab:
 
     def change_font(self, font, size, spacing):
         self.txt.config(font=('{0} {1}'.format(font, size)), spacing3=int(spacing))
+
+    def clear_memory_text(self):
+        self.all_visible_text = ''
+
+    def __key_check(self, event):
+        #print(event)
+        count_sym = len(event.widget.get())
+        if count_sym < 100:
+            pass
+        elif event.keysym in ('BackSpace', 'Left', 'Right', 'Tab', 'Delete') or event.widget.selection_present():
+            pass
+        else:
+            return 'break'
+
+    def clear_tab(self):
+        self.txt.delete(1.0, tkinter.END)
+        self.page.destroy()

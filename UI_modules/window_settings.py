@@ -1,3 +1,6 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import tkinter
 from tkinter import font
 from tkinter import StringVar
@@ -96,10 +99,11 @@ class WindowSetting:
         if event.char.isdigit():
             if count_sym < 2:
                 pass
+            elif event.widget.selection_present():
+                pass
             else:
-                print(event.keysym)
                 return 'break'
-        elif event.keysym in ('BackSpace', 'Left', 'Right', 'Tab', 'Del'):
+        elif event.keysym in ('BackSpace', 'Left', 'Right', 'Tab', 'Delete') or event.widget.selection_present():
             pass
         else:
             return 'break'
