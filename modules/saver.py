@@ -1,3 +1,6 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import zipfile
 import os
 from tkinter.filedialog import asksaveasfilename
@@ -34,6 +37,7 @@ class Saver:
                         file.write(self.current_tab_text)
                     my_zip.write(tmp_file)
                     os.remove(tmp_file)
+                    tab.clear_memory_text()
             logging.debug('Packing finished')
         else:
             logging.debug('Path to save not set')
@@ -55,6 +59,8 @@ class Saver:
                     with open(self.path_to_save, 'w') as file:
                         file.write(self.current_tab_text)
                     logging.debug('File %s saved to %s', tab.tab_name, self.path_to_save)
+                    tab.clear_memory_text()
                 else:
                     logging.debug('Path to save not set')
+                    tab.clear_memory_text()
                     return
