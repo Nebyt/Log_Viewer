@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-import gc
+
 import os
 import modules.recognize_codec as codec
 import logging
@@ -31,14 +31,14 @@ class Tail:
                 with open(self.__path, 'r', encoding=self.__fmt, errors='replace') as file:
                     file.seek(self.__tail)
                     text = ''
-                    for string in file:
-                        text += string
+                    text = file.read()
                     self.__tail = file.tell()
                     self.__last_change = file_last_change
                     del file
-                    gc.collect(generation=2)
                 return text
             except FileNotFoundError:
                 logging.error('File not found!')
                 print('File not found!')
+            finally:
+                del text
         return ''

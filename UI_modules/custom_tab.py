@@ -7,6 +7,7 @@ from tkinter import ttk
 from tkinter import BooleanVar, StringVar
 import threading
 import time
+import gc
 from modules.list_of_tab import list_of_tab
 import logging
 from UI_modules.window_settings import WindowSetting
@@ -177,6 +178,7 @@ class Tab:
             self.txt.config(state='normal')
             self.txt.insert(tkinter.END, self.document.get_lines())
             self.txt.config(state='disabled')
+            gc.collect()
         except tkinter.TclError:
             logging.warning('The tab is already closed')
             pass

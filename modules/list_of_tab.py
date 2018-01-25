@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
+
 class ListOfTab:
     # Необходимо для управления вкладками
     def __init__(self):

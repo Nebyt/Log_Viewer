@@ -99,6 +99,7 @@ else:
     path_to_icon = os.path.join(os.getcwd(), icon)
 
 # здесь начинается описание UI
+gc.enable()
 root = tkinter.Tk()
 
 app_height = APP_HEIGHT
@@ -140,7 +141,6 @@ root.minsize(app_width, app_height)
 root.geometry('{0}x{1}'.format(app_width, app_height))
 root.geometry('+{0}+{1}'.format(start_pos_x, start_pos_y))
 
-gc.enable()
 # запуск отрисовки UI
 root.mainloop()
 logging.debug('-------------------Programm close-------------------')

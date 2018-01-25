@@ -54,10 +54,12 @@ class CustomNotebook(ttk.Notebook):
         for tab in list_of_tab.get_all_tab():
             if tab.tab_name == tab_name_for_delete:
                 #tab.clear_tab()
-                list_of_tab.remove_tab(tab)
                 logging.debug('Tab %s closed', tab.tab_name)
+                list_of_tab.remove_tab(tab)
+                del tab.txt
+                del tab
+                gc.collect()
                 break
-        gc.collect(generation=2)
 
     def __initialize_custom_style(self):
         style = ttk.Style()
