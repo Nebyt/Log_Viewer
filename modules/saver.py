@@ -46,7 +46,6 @@ class Saver:
     def save_one(self):
         for tab in self.all_tabs:
             if tab.tab_name == self.tab_name:
-                self.current_tab_text = tab.get_all_text()
                 tmp_file = tab.tab_name
                 self.path_to_save = asksaveasfilename(title='Save file',
                                                       initialfile='{}'.format(tmp_file),
@@ -54,6 +53,7 @@ class Saver:
                                                                  ("Text File", "*.txt"),
                                                                  ("All files", "*.*")))
                 if self.path_to_save:
+                    self.current_tab_text = tab.get_all_text()
                     logging.debug('Save file %s', tab.tab_name)
                     logging.debug('Path to save %s', self.path_to_save)
                     with open(self.path_to_save, 'w') as file:
@@ -62,5 +62,4 @@ class Saver:
                     tab.clear_memory_text()
                 else:
                     logging.debug('Path to save not set')
-                    tab.clear_memory_text()
                     return

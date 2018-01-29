@@ -7,7 +7,6 @@ from tkinter import ttk
 from tkinter import BooleanVar, StringVar
 import threading
 import time
-import gc
 from modules.list_of_tab import list_of_tab
 import logging
 from UI_modules.window_settings import WindowSetting
@@ -178,8 +177,10 @@ class Tab:
             self.txt.config(state='normal')
             self.txt.insert(tkinter.END, self.document.get_lines())
             self.txt.config(state='disabled')
-            gc.collect()
         except tkinter.TclError:
+            logging.warning('The tab is already closed')
+            pass
+        except AttributeError:
             logging.warning('The tab is already closed')
             pass
 
@@ -465,5 +466,15 @@ class Tab:
             return 'break'
 
     def clear_tab(self):
-        self.txt.delete(1.0, tkinter.END)
+        del self.document
+        for elem in self.tags_dict:
+            self.tags_dict[elem] = None
+        del self.tags_dict
+        del self.thread_highlight_error
+        del self.thread_highlight_debug
+        del self.thread_highlight_info
+        del self.thread_highlight_warn
+        del self.thread_highlight_word
+        del self.thread_show_last_string
+        del self.txt
         self.page.destroy()

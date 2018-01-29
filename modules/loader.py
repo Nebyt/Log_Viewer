@@ -27,6 +27,7 @@ class Tail:
         if not self.__fmt:
             self.__recognize_format(self.__path)
         if file_last_change > last_processed_change:
+            text = ''
             try:
                 with open(self.__path, 'r', encoding=self.__fmt, errors='replace') as file:
                     file.seek(self.__tail)
@@ -38,7 +39,6 @@ class Tail:
                 return text
             except FileNotFoundError:
                 logging.error('File not found!')
-                print('File not found!')
             finally:
                 del text
         return ''

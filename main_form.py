@@ -16,7 +16,6 @@ from UI_modules.window_settings import WindowSetting
 from modules.saver import Saver
 from modules.list_of_tab import list_of_tab
 
-
 logging.basicConfig(format='%(asctime)s:[%(levelname)s] %(message)s',
                     filename='logviewer_debug.log',
                     level=logging.DEBUG)
@@ -58,7 +57,10 @@ def save_all_file(event=None):
 def update_tabs():
     while True:
         for tab in list_of_tab.get_all_tab():
-            tab.update_text()
+            try:
+                tab.update_text()
+            except AttributeError:
+                logging.warning("Tab is not existing")
         time.sleep(1)
 
 

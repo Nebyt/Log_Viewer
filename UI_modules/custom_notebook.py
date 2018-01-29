@@ -7,6 +7,7 @@ import gc
 from modules.list_of_tab import list_of_tab
 import logging
 
+
 class CustomNotebook(ttk.Notebook):
     """A ttk Notebook with close buttons on each tab"""
 
@@ -53,11 +54,11 @@ class CustomNotebook(ttk.Notebook):
 
         for tab in list_of_tab.get_all_tab():
             if tab.tab_name == tab_name_for_delete:
-                #tab.clear_tab()
-                logging.debug('Tab %s closed', tab.tab_name)
+                current_tab_name = tab.tab_name
+                tab.clear_tab()
                 list_of_tab.remove_tab(tab)
-                del tab.txt
                 del tab
+                logging.debug('Tab %s closed', current_tab_name)
                 gc.collect()
                 break
 
