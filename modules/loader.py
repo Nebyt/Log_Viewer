@@ -4,6 +4,7 @@
 import os
 import modules.recognize_codec as codec
 import logging
+import gc
 
 
 class Tail:
@@ -41,4 +42,5 @@ class Tail:
                 logging.error('File not found!')
             finally:
                 del text
+                gc.collect(generation=2)
         return ''

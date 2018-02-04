@@ -3,6 +3,7 @@
 
 from modules.loader import Tail
 import tkinter
+import gc
 from tkinter import ttk
 from tkinter import BooleanVar, StringVar
 import threading
@@ -13,6 +14,7 @@ from UI_modules.window_settings import WindowSetting
 
 
 class Tab:
+
     def __init__(self, main_space, file_path=''):
         self.main_foreground = 'white'
         self.main_background = '#696969'
@@ -98,13 +100,13 @@ class Tab:
                                                            font="TextFont 11",
                                                            command=self.__highlight_word_starter)
         self.word_highlight_checkbox.pack(side='right')
-        #self.word_filter_checkbox = tkinter.Checkbutton(self.bottom_frame, text='Filter by word', bd=4,
+        # self.word_filter_checkbox = tkinter.Checkbutton(self.bottom_frame, text='Filter by word', bd=4,
         #                                                variable=self.word_filter_state,
         #                                                onvalue=True,
         #                                                offvalue=False,
         #                                                font="TextFont 11",
         #                                                command=self.__highlight_word_starter)
-        #self.word_filter_checkbox.pack(side='right')
+        # self.word_filter_checkbox.pack(side='right')
 
         self.txt.pack(side='top', fill='both', expand=True)
         self.scroll.pack(side='right', fill=tkinter.Y)
@@ -132,7 +134,7 @@ class Tab:
 
         # поток для выделения ERROR
         self.thread_highlight_error = threading.Thread(target=self.__highlight_error,
-                                                       args=['error',self.search_err_index],
+                                                       args=['error', self.search_err_index],
                                                        daemon=True,
                                                        name='highlight_error')
         # поток для выделения WARN
@@ -214,7 +216,9 @@ class Tab:
             new_sym = str(int(sym) + len(word))
             next_start_index = '{0}.{1}'.format(string, new_sym)
             self.search_err_index = next_start_index
-            self.tags_dict[word].append(pos)
+            pos_float = float(pos)
+            print(pos_float)
+            self.tags_dict[word].append(pos_float)
             return pos, next_start_index
         else:
             next_start_index = ''
@@ -422,6 +426,7 @@ class Tab:
                 else:
                     tag = tag_word
                 for position in self.tags_dict[tag_word]:
+                    position = str(position)
                     string, sym = position.split('.')
                     last_symbol = str(int(sym) + length_of_word)
                     last_index = '{0}.{1}'.format(string, last_symbol)
@@ -456,7 +461,7 @@ class Tab:
         self.all_visible_text = ''
 
     def __key_check(self, event):
-        #print(event)
+        #  print(event)
         count_sym = len(event.widget.get())
         if count_sym < 100:
             pass
@@ -478,3 +483,4 @@ class Tab:
         del self.thread_show_last_string
         del self.txt
         self.page.destroy()
+        gc.collect()
