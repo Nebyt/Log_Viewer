@@ -76,12 +76,17 @@ def add_tab(event=None):
         if type_of_file == 'text' or not type_of_file[0]:
             list_of_tab.add_tab(Tab(nb, file_path))
             logging.debug('Added tab for file %s', file_path)
+            del file_path
+            del type_of_file
 
         else:
             file_name = file_path.split('/')[-1]
             logging.warning('%s is not a text', file_name)
             messagebox.showinfo('Information', '{0} is not a text!'.format(file_name))
+            del file_path
+            del type_of_file
     else:
+        del file_path
         return
 
 

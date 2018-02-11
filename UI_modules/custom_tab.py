@@ -190,8 +190,11 @@ class Tab:
         # На постоянке крутиться проверка для перехода к концу отображаемого
         while True:
             while self.__end:
-                self.txt.see(tkinter.END)
-                time.sleep(1)
+                try:
+                    self.txt.see(tkinter.END)
+                    time.sleep(1)
+                except AttributeError:
+                    logging.warning('Tab is closed')
             time.sleep(1)
 
     def __watch_tail(self, event):
@@ -216,9 +219,7 @@ class Tab:
             new_sym = str(int(sym) + len(word))
             next_start_index = '{0}.{1}'.format(string, new_sym)
             self.search_err_index = next_start_index
-            pos_float = float(pos)
-            print(pos_float)
-            self.tags_dict[word].append(pos_float)
+            self.tags_dict[word].append(pos)
             return pos, next_start_index
         else:
             next_start_index = ''
@@ -426,7 +427,6 @@ class Tab:
                 else:
                     tag = tag_word
                 for position in self.tags_dict[tag_word]:
-                    position = str(position)
                     string, sym = position.split('.')
                     last_symbol = str(int(sym) + length_of_word)
                     last_index = '{0}.{1}'.format(string, last_symbol)
@@ -481,6 +481,29 @@ class Tab:
         del self.thread_highlight_warn
         del self.thread_highlight_word
         del self.thread_show_last_string
+        self.txt.delete('1.0', tkinter.END)
         del self.txt
+        del self.main_foreground
+        del self.main_background
+        del self.path_to_file
+        del self.error_state
+        del self.warn_state
+        del self.debug_state
+        del self.info_state
+        del self.word_highlight_state
+        del self.word_filter_state
+        del self.__end
+        del self.search_err_index
+        del self.search_warn_index
+        del self.search_debug_index
+        del self.search_info_index
+        del self.search_word_index
+        del self.need_check
+        del self.standart_word
+        del self.input_word
+        del self.all_visible_text
+        del self.all_threads
         self.page.destroy()
+        del self.page
+        del self.bottom_frame
         gc.collect()
