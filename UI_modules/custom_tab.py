@@ -16,6 +16,8 @@ from UI_modules.window_settings import WindowSetting
 class Tab:
 
     def __init__(self, main_space, file_path=''):
+        self.main_space = main_space
+        self.previous_key = ''
         self.main_foreground = 'white'
         self.main_background = '#696969'
         self.path_to_file = file_path
@@ -42,12 +44,13 @@ class Tab:
         self.document = Tail(file_path)
 
         # объект вкладка
-        self.page = ttk.Frame(main_space)
+        self.page = ttk.Frame(self.main_space)
 
         # нижняя область для чек боксов
         self.bottom_frame = ttk.Frame(self.page)
 
         # имя вкладки, берем последнее значение после разделения по символу
+
         self.__tab_name_expect = file_path.split('/')[-1]
         self.tab_name = self.__set_tab_name(self.__tab_name_expect)
         self.txt = tkinter.Text(self.page,
@@ -164,12 +167,18 @@ class Tab:
 
     def __set_tab_name(self, tab_name_expect):
         # установка имени вкладки, если вкладка с таким именем уже существет добаляем порядковый номер к названию файла
-        self.__name, self.__file_fmt = tab_name_expect.split('.')
+        self.__name, *self.__file_fmt = tab_name_expect.split('.')
         self.__all_tabs = list_of_tab.get_all_tab()
         self.__count = 1
+        if len(self.__file_fmt) > 1:
+            file_frmt = '.'.join(self.__file_fmt)
+        elif len(self.__file_fmt) == 1:
+            file_frmt = self.__file_fmt[0]
+        else:
+            file_frmt = ''
         for tab in self.__all_tabs:
             if tab.tab_name == tab_name_expect:
-                tab_name_expect = '{0}({1}).{2}'.format(self.__name, self.__count, self.__file_fmt)
+                tab_name_expect = '{0}({1}).{2}'.format(self.__name, self.__count, file_frmt)
                 self.__count += 1
         return tab_name_expect
 
@@ -461,13 +470,58 @@ class Tab:
         self.all_visible_text = ''
 
     def __key_check(self, event):
-        #  print(event)
-        count_sym = len(event.widget.get())
-        if count_sym < 100:
+        actual_key = event.keysym
+
+        try:
+            clipboard_text = self.main_space.clipboard_get()
+        except tkinter.TclError:
+            logging.info('Clipboard is empty')
+            clipboard_text = ''
             pass
-        elif event.keysym in ('BackSpace', 'Left', 'Right', 'Tab', 'Delete') or event.widget.selection_present():
+        len_clipboard_text = len(clipboard_text)
+        entry_text = event.widget.get()
+        count_sym = len(entry_text)
+
+        if actual_key == 'igrave' or (self.previous_key == 'Control_L' and actual_key == 'v'):
+            symb_sum = len_clipboard_text + count_sym
+            if symb_sum > 100:
+                text_index = event.widget.index(tkinter.INSERT)
+                dif = 100 - text_index
+                if dif < len_clipboard_text:
+                    cut_entry = entry_text[:text_index]
+                    cut_clipboard = clipboard_text[:dif]
+                    new_string = cut_entry + cut_clipboard
+                    event.widget.delete(0, tkinter.END)
+                    event.widget.insert(0, new_string)
+                    event.widget.icursor(text_index)
+                elif dif >= len_clipboard_text:
+                    cut_entry_1 = entry_text[:text_index]
+                    cut_entry_2 = entry_text[text_index:]
+                    new_string = cut_entry_1 + clipboard_text + cut_entry_2
+                    new_string = new_string[:100]
+                    event.widget.delete(0, tkinter.END)
+                    event.widget.insert(0, new_string)
+                    event.widget.icursor(text_index)
+            else:
+                text_index = event.widget.index(tkinter.INSERT)
+                event.widget.insert(text_index, clipboard_text)
+                event.widget.icursor(text_index)
+        elif count_sym < 100:
+            self.previous_key = actual_key
             pass
+
+        elif actual_key in ('BackSpace', 'Left', 'Right', 'Tab', 'Delete') or event.widget.selection_present():
+            if count_sym > 100:
+                event.widget.delete(100, tkinter.END)
+            self.previous_key = actual_key
+            pass
+
+        elif count_sym > 100:
+            event.widget.delete(100, tkinter.END)
+            self.previous_key = actual_key
+
         else:
+            self.previous_key = actual_key
             return 'break'
 
     def clear_tab(self):
