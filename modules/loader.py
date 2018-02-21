@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-import modules.recognize_codec as codec
+import chardet
 import logging
 import gc
 
@@ -18,8 +18,14 @@ class Tail:
     def __recognize_format(self, path_to_file):
         # Пробуем угадать кодировку файла
         logging.info('Try to recognize file codec')
-        self.__fmt = codec.get_string_to_recognize(path_to_file)
+        self.__string = self.__get_string_to_recognize(path_to_file)
+        self.__fmt = chardet.detect(self.__string)['encoding']
         logging.info("File's codec is %s", self.__fmt)
+
+    def __get_string_to_recognize(self, path):
+        with open(path, 'rb') as file:
+            string_massive = file.read(25000)
+        return string_massive
 
     def get_lines(self):
         # Читаем файл, если файл изменялся после нашего последнего чтения
