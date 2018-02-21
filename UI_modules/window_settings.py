@@ -50,11 +50,12 @@ class WindowSetting:
 
         self.font_label = tkinter.Label(self.frame_2, text='Font families :')
         self.__font_var.set(WindowSetting.font_family)
-        self.font_dropdown_menu = ttk.Combobox(self.frame_2, textvariable=self.__font_var)
+        self.font_dropdown_menu = ttk.Combobox(self.frame_2, textvariable=self.__font_var, state='readonly')
         self.font_dropdown_menu['values'] = self.aval_fonts
         self.font_dropdown_menu.config(width=80)
         self.font_label.pack(side='left')
         self.font_dropdown_menu.pack(side='left', expand=False)
+        self.font_dropdown_menu.bind('<KeyPress>', self.__sort_by_key)
 
         self.spacing_label = tkinter.Label(self.frame_3, text='Spaces between strings :')
         self.__spaces.set(WindowSetting.spacing_btwn_str)
@@ -110,3 +111,10 @@ class WindowSetting:
                 return 'break'
         else:
             return 'break'
+
+    def __sort_by_key(self, event):
+        letter = event.char
+        for sym in event.widget['values']:
+            if letter.upper() == sym[0].upper():
+                event.widget.set(sym)
+                break
