@@ -94,6 +94,7 @@ def window_settings(event=None):
     window = WindowSetting()
     window.show()
 
+
 logging.debug('-------------------Programm start-------------------')
 if os.name == 'posix':
     logging.debug('This is Linux OS')
