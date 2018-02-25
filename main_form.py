@@ -135,6 +135,7 @@ root.bind('<Control-Shift-KeyPress-S>', save_all_file)
 
 # Определение и расположение на форме виджета Блокнот
 nb = CustomNotebook(root)
+nb.enable_traversal()
 nb.pack(fill='both', expand='yes')
 # здесь заканчивается описание UI
 
