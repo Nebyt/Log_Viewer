@@ -104,7 +104,7 @@ class WindowSetting:
                 pass
             else:
                 return 'break'
-        elif event.keysym in ('BackSpace', 'Left', 'Right', 'Tab', 'Delete') or event.widget.selection_present():
+        elif event.keycode in (8, 37, 39, 8, 46) or event.widget.selection_present():
             if event.char.isdigit():
                 pass
             else:

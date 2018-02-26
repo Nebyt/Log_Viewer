@@ -327,6 +327,9 @@ class Tab:
 
     def __highlight_word_starter(self):
         # Запуск потока для поиска и выделения заданного слова
+        if self.__get_input_text() in self.standart_word:
+            self.word_highlight_checkbox.deselect()
+            return
         if not self.thread_highlight_word.isAlive():
             self.thread_highlight_word.start()
             self.all_threads.append(self.thread_highlight_word)
@@ -409,6 +412,9 @@ class Tab:
         while True:
             word = self.__get_input_text()
             while self.word_highlight_state.get():
+                if word in self.standart_word:
+                    self.word_highlight_checkbox.deselect()
+                    return
                 self.input_field.config(state='disabled')
                 if word not in self.need_check.keys():
                     self.need_check[word] = False
