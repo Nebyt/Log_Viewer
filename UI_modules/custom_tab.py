@@ -33,12 +33,11 @@ class Tab:
         self.search_debug_index = '1.0'
         self.search_info_index = '1.0'
         self.search_word_index = '1.0'
-        self.tags_dict = {'error': [], 'warn': [], 'debug': [], 'info': []}
-        self.need_check = {'error': False, 'warn': False, 'debug': False, 'info': False}
+        self.tags_dict = {}
+        self.need_check = {}
         self.standart_word = ('error', 'warn', 'debug', 'info')
         self.input_word = StringVar()
         self.all_visible_text = ''
-        self.all_threads = []
 
         # создаем на вкладке объект документа, который читаем
         self.document = Tail(file_path)
@@ -64,34 +63,6 @@ class Tab:
         self.scroll.config(command=self.txt.yview, cursor='arrow')
         self.bottom_frame.pack(side='bottom', fill=tkinter.X)
 
-        self.error_checkbox = tkinter.Checkbutton(self.bottom_frame, text='Error', bd=4,
-                                                  variable=self.error_state,
-                                                  onvalue=True,
-                                                  offvalue=False,
-                                                  font="TextFont 11",
-                                                  command=self.__highlight_error_starter)
-        self.error_checkbox.pack(side='left')
-        self.warn_checkbox = tkinter.Checkbutton(self.bottom_frame, text='Warn', bd=4,
-                                                 variable=self.warn_state,
-                                                 onvalue=True,
-                                                 offvalue=False,
-                                                 font="TextFont 11",
-                                                 command=self.__highlight_warn_starter)
-        self.warn_checkbox.pack(side='left')
-        self.debug_checkbox = tkinter.Checkbutton(self.bottom_frame, text='Debug', bd=4,
-                                                  variable=self.debug_state,
-                                                  onvalue=True,
-                                                  offvalue=False,
-                                                  font="TextFont 11",
-                                                  command=self.__highlight_debug_starter)
-        self.debug_checkbox.pack(side='left')
-        self.info_checkbox = tkinter.Checkbutton(self.bottom_frame, text='Info', bd=4,
-                                                 variable=self.info_state,
-                                                 onvalue=True,
-                                                 offvalue=False,
-                                                 font="TextFont 11",
-                                                 command=self.__highlight_info_starter)
-        self.info_checkbox.pack(side='left')
         self.input_field = tkinter.Entry(self.bottom_frame, bd=3, textvariable=self.input_word)
         self.input_field.pack(side='right', fill=tkinter.X, expand=True)
         self.input_field.bind('<KeyPress>', self.__key_check)
@@ -103,22 +74,11 @@ class Tab:
                                                            font="TextFont 11",
                                                            command=self.__highlight_word_starter)
         self.word_highlight_checkbox.pack(side='right')
-        # self.word_filter_checkbox = tkinter.Checkbutton(self.bottom_frame, text='Filter by word', bd=4,
-        #                                                variable=self.word_filter_state,
-        #                                                onvalue=True,
-        #                                                offvalue=False,
-        #                                                font="TextFont 11",
-        #                                                command=self.__highlight_word_starter)
-        # self.word_filter_checkbox.pack(side='right')
 
         self.txt.pack(side='top', fill='both', expand=True)
         self.scroll.pack(side='right', fill=tkinter.Y)
 
         # тэги для выделения слов
-        self.txt.tag_config("error", background="red", foreground="yellow")
-        self.txt.tag_config("warn", background="yellow", foreground="dodger blue")
-        self.txt.tag_config("debug", background="blue", foreground="white")
-        self.txt.tag_config("info", background="green2", foreground="blue")
         self.txt.tag_config("custom", background="orange", foreground="black")
 
         # добавляем вкладку
@@ -135,26 +95,6 @@ class Tab:
         # закрываем возможность редактировать
         self.txt.config(state='disabled')
 
-        # поток для выделения ERROR
-        self.thread_highlight_error = threading.Thread(target=self.__highlight_error,
-                                                       args=['error', self.search_err_index],
-                                                       daemon=True,
-                                                       name='highlight_error')
-        # поток для выделения WARN
-        self.thread_highlight_warn = threading.Thread(target=self.__highlight_warn,
-                                                      args=['warn', self.search_warn_index],
-                                                      daemon=True,
-                                                      name='highlight_warn')
-        # поток для выделения DEBUG
-        self.thread_highlight_debug = threading.Thread(target=self.__highlight_debug,
-                                                       args=['debug', self.search_debug_index],
-                                                       daemon=True,
-                                                       name='highlight_debug')
-        # поток для выделения INFO
-        self.thread_highlight_info = threading.Thread(target=self.__highlight_info,
-                                                      args=['info', self.search_info_index],
-                                                      daemon=True,
-                                                      name='highlight_info')
         # поток для выделения введенного слова
         self.thread_highlight_word = threading.Thread(target=self.__highlight_word,
                                                       args=[self.search_word_index],
@@ -211,73 +151,12 @@ class Tab:
         self.__end = 1
         if not self.thread_show_last_string.isAlive():
             self.thread_show_last_string.start()
-            self.all_threads.append(self.thread_show_last_string)
             logging.debug('Start thread to watch tail of file %s', self.__tab_name_expect)
 
     def __stop_watch_tail(self, event):
         # Меняем триггер просмотра последнего изменения
         self.__end = 0
         logging.debug('Pause thread to watch tail of file %s', self.__tab_name_expect)
-
-    def __search_error(self, word, start_index):
-        # Поиск первой позиции ERROR от заданной первой позиции
-        # Возращаем позицию первого символа и последнего
-        pos = self.txt.search(word, start_index, tkinter.END, nocase=True)
-        if pos:
-            string, sym = pos.split('.')
-            new_sym = str(int(sym) + len(word))
-            next_start_index = '{0}.{1}'.format(string, new_sym)
-            self.search_err_index = next_start_index
-            self.tags_dict[word].append(pos)
-            return pos, next_start_index
-        else:
-            next_start_index = ''
-            return pos, next_start_index
-
-    def __search_warn(self, word, start_index):
-        # Поиск первой позиции WARN от заданной первой позиции
-        # Возращаем позицию первого символа и последнего
-        pos = self.txt.search(word, start_index, tkinter.END, nocase=True)
-        if pos:
-            string, sym = pos.split('.')
-            new_sym = str(int(sym) + len(word))
-            next_start_index = '{0}.{1}'.format(string, new_sym)
-            self.search_warn_index = next_start_index
-            self.tags_dict[word].append(pos)
-            return pos, next_start_index
-        else:
-            next_start_index = ''
-            return pos, next_start_index
-
-    def __search_debug(self, word, start_index):
-        # Поиск первой позиции DEBUG от заданной первой позиции
-        # Возращаем позицию первого символа и последнего
-        pos = self.txt.search(word, start_index, tkinter.END, nocase=True)
-        if pos:
-            string, sym = pos.split('.')
-            new_sym = str(int(sym) + len(word))
-            next_start_index = '{0}.{1}'.format(string, new_sym)
-            self.search_debug_index = next_start_index
-            self.tags_dict[word].append(pos)
-            return pos, next_start_index
-        else:
-            next_start_index = ''
-            return pos, next_start_index
-
-    def __search_info(self, word, start_index):
-        # Поиск первой позиции INFO от заданной первой позиции
-        # Возращаем позицию первого символа и последнего
-        pos = self.txt.search(word, start_index, tkinter.END, nocase=True)
-        if pos:
-            string, sym = pos.split('.')
-            new_sym = str(int(sym) + len(word))
-            next_start_index = '{0}.{1}'.format(string, new_sym)
-            self.search_info_index = next_start_index
-            self.tags_dict[word].append(pos)
-            return pos, next_start_index
-        else:
-            next_start_index = ''
-            return pos, next_start_index
 
     def __search_word(self, word, start_index):
         # Поиск первой позиции слова от заданной первой позиции
@@ -291,115 +170,20 @@ class Tab:
             try:
                 self.tags_dict[word].append(pos)
             except KeyError:
+                logging.debug('Add word "{0}" to dictionary of words'.format(word))
                 self.tags_dict[word] = [pos]
             return pos, next_start_index
         else:
             next_start_index = ''
             return pos, next_start_index
 
-    def __highlight_error_starter(self):
-        # Запуск потока для поиска и выделения слова ERROR
-        if not self.thread_highlight_error.isAlive():
-            self.thread_highlight_error.start()
-            self.all_threads.append(self.thread_highlight_error)
-            logging.debug('Start thread to watch ERROR of file %s', self.__tab_name_expect)
-
-    def __highlight_warn_starter(self):
-        # Запуск потока для поиска и выделения слова WARN
-        if not self.thread_highlight_warn.isAlive():
-            self.thread_highlight_warn.start()
-            self.all_threads.append(self.thread_highlight_warn)
-            logging.debug('Start thread to watch WARNING of file %s', self.__tab_name_expect)
-
-    def __highlight_debug_starter(self):
-        # Запуск потока для поиска и выделения слова DEBUG
-        if not self.thread_highlight_debug.isAlive():
-            self.thread_highlight_debug.start()
-            self.all_threads.append(self.thread_highlight_debug)
-            logging.debug('Start thread to watch DEBUG of file %s', self.__tab_name_expect)
-
-    def __highlight_info_starter(self):
-        # Запуск потока для поиска и выделения слова INFO
-        if not self.thread_highlight_info.isAlive():
-            self.thread_highlight_info.start()
-            self.all_threads.append(self.thread_highlight_info)
-            logging.debug('Start thread to watch INFO of file %s', self.__tab_name_expect)
-
     def __highlight_word_starter(self):
         # Запуск потока для поиска и выделения заданного слова
-        if self.__get_input_text() in self.standart_word:
-            self.word_highlight_checkbox.deselect()
-            return
         if not self.thread_highlight_word.isAlive():
             self.thread_highlight_word.start()
-            self.all_threads.append(self.thread_highlight_word)
             logging.debug('Start thread to watch "%s" word in file %s',
                           self.input_word.get().strip(),
                           self.__tab_name_expect)
-
-    def __highlight_error(self, word, start_index):
-        # Выделение найденного ERROR
-        next_index = start_index
-        while True:
-            while self.error_state.get():
-                if self.need_check[word]:
-                    self.__highlight_again(word)
-                first_sym, last_sym = self.__search_error(word, start_index=next_index)
-                if last_sym:
-                    next_index = last_sym
-                    self.txt.tag_add(word, first_sym, last_sym)
-                else:
-                    time.sleep(1)
-            self.__unhighlight(word.lower())
-            time.sleep(1)
-
-    def __highlight_warn(self, word, start_index):
-        # Выделение найденного WARN
-        next_index = start_index
-        while True:
-            while self.warn_state.get():
-                if self.need_check[word]:
-                    self.__highlight_again(word)
-                first_sym, last_sym = self.__search_warn(word, start_index=next_index)
-                if last_sym:
-                    next_index = last_sym
-                    self.txt.tag_add(word, first_sym, last_sym)
-                else:
-                    time.sleep(1)
-            self.__unhighlight(word.lower())
-            time.sleep(1)
-
-    def __highlight_debug(self, word, start_index):
-        # Выделение найденного DEBUG
-        next_index = start_index
-        while True:
-            while self.debug_state.get():
-                if self.need_check[word]:
-                    self.__highlight_again(word)
-                first_sym, last_sym = self.__search_debug(word, start_index=next_index)
-                if last_sym:
-                    next_index = last_sym
-                    self.txt.tag_add(word, first_sym, last_sym)
-                else:
-                    time.sleep(1)
-            self.__unhighlight(word.lower())
-            time.sleep(1)
-
-    def __highlight_info(self, word, start_index):
-        # Выделение найденного INFO
-        next_index = start_index
-        while True:
-            while self.info_state.get():
-                if self.need_check[word]:
-                    self.__highlight_again(word)
-                first_sym, last_sym = self.__search_info(word, start_index=next_index)
-                if last_sym:
-                    next_index = last_sym
-                    self.txt.tag_add(word, first_sym, last_sym)
-                else:
-                    time.sleep(1)
-            self.__unhighlight(word.lower())
-            time.sleep(1)
 
     def __get_input_text(self):
         # Получаем слово из поля ввода
@@ -411,9 +195,6 @@ class Tab:
         next_index = start_index
         while True:
             word = self.__get_input_text()
-            if word in self.standart_word:
-                self.word_highlight_checkbox.deselect()
-                return
             while self.word_highlight_state.get():
                 self.input_field.config(state='disabled')
                 if word not in self.need_check.keys():
@@ -437,10 +218,7 @@ class Tab:
             if not self.need_check[tag_word]:
                 logging.debug('Unhighlight "%s" word in file %s', tag_word, self.__tab_name_expect)
                 length_of_word = len(tag_word)
-                if tag_word.lower() not in self.standart_word:
-                    tag = 'custom'
-                else:
-                    tag = tag_word
+                tag = 'custom'
                 for position in self.tags_dict[tag_word]:
                     string, sym = position.split('.')
                     last_symbol = str(int(sym) + length_of_word)
@@ -453,10 +231,7 @@ class Tab:
     def __highlight_again(self, word):
         # Повторная подсветка уже найденных слов
         length_of_word = len(word)
-        if word not in self.standart_word:
-            tag = 'custom'
-        else:
-            tag = word
+        tag = 'custom'
         for position in self.tags_dict[word]:
             string, sym = position.split('.')
             last_symbol = str(int(sym) + length_of_word)
@@ -535,11 +310,11 @@ class Tab:
             self.previous_key = actual_keycode
             pass
 
-        elif (self.previous_key == 17 and actual_keycode == 65):
+        elif self.previous_key == 17 and actual_keycode == 65:
             event.widget.select_range(0, tkinter.END)
             event.widget.icursor(tkinter.END)
 
-        elif (self.previous_key == 17 and actual_keycode == 67):
+        elif self.previous_key == 17 and actual_keycode == 67:
             selected_text = event.widget.selection_present()
             self.main_space.clipboard_append(selected_text)
 
@@ -556,10 +331,6 @@ class Tab:
         for elem in self.tags_dict:
             self.tags_dict[elem] = None
         del self.tags_dict
-        del self.thread_highlight_error
-        del self.thread_highlight_debug
-        del self.thread_highlight_info
-        del self.thread_highlight_warn
         del self.thread_highlight_word
         del self.thread_show_last_string
         self.txt.delete('1.0', tkinter.END)
@@ -583,7 +354,6 @@ class Tab:
         del self.standart_word
         del self.input_word
         del self.all_visible_text
-        del self.all_threads
         self.page.destroy()
         del self.page
         del self.bottom_frame
