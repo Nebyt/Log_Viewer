@@ -138,13 +138,16 @@ class Tab:
     def __shows_the_last_string(self):
         # На постоянке крутиться проверка для перехода к концу отображаемого
         while True:
-            while self.__end:
-                try:
-                    self.txt.see(tkinter.END)
-                    time.sleep(1)
-                except AttributeError:
-                    logging.warning('Tab is closed')
-            time.sleep(1)
+            try:
+                while self.__end:
+                    try:
+                        self.txt.see(tkinter.END)
+                        time.sleep(1)
+                    except AttributeError:
+                        logging.warning('Tab is closed')
+                time.sleep(1)
+            except AttributeError as err:
+                logging.warning('Object and attribute is deleted', err)
 
     def __watch_tail(self, event):
         # Запуск потока для постоянного просмотра последнего изменения
@@ -194,23 +197,26 @@ class Tab:
         # Выделение найденного слова из поля ввода
         next_index = start_index
         while True:
-            word = self.__get_input_text()
-            while self.word_highlight_state.get():
-                self.input_field.config(state='disabled')
-                if word not in self.need_check.keys():
-                    self.need_check[word] = False
-                    next_index = '1.0'
-                if self.need_check[word]:
-                    self.__highlight_again(word)
-                first_sym, last_sym = self.__search_word(word, start_index=next_index)
-                if last_sym:
-                    next_index = last_sym
-                    self.txt.tag_add('custom', first_sym, last_sym)
-                else:
-                    time.sleep(1)
-            self.input_field.config(state='normal')
-            self.__unhighlight(word)
-            time.sleep(1)
+            try:
+                word = self.__get_input_text()
+                while self.word_highlight_state.get():
+                    self.input_field.config(state='disabled')
+                    if word not in self.need_check.keys():
+                        self.need_check[word] = False
+                        next_index = '1.0'
+                    if self.need_check[word]:
+                        self.__highlight_again(word)
+                    first_sym, last_sym = self.__search_word(word, start_index=next_index)
+                    if last_sym:
+                        next_index = last_sym
+                        self.txt.tag_add('custom', first_sym, last_sym)
+                    else:
+                        time.sleep(1)
+                self.input_field.config(state='normal')
+                self.__unhighlight(word)
+                time.sleep(1)
+            except AttributeError as err:
+                logging.warning('Object and attribute is deleted', err)
 
     def __unhighlight(self, tag_word):
         # Удаляем тэги
