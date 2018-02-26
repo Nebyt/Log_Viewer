@@ -470,7 +470,7 @@ class Tab:
         self.all_visible_text = ''
 
     def __key_check(self, event):
-        actual_key = event.keysym
+        actual_keycode = event.keycode
 
         try:
             clipboard_text = self.main_space.clipboard_get()
@@ -482,10 +482,13 @@ class Tab:
         entry_text = event.widget.get()
         count_sym = len(entry_text)
 
-        if actual_key == 'igrave' or (self.previous_key == 'Control_L' and actual_key == 'v'):
-            symb_sum = len_clipboard_text + count_sym
+        if self.previous_key == 17 and actual_keycode == 86:
             if event.widget.selection_present():
                 event.widget.delete('sel.first', 'sel.last')
+
+            entry_text = event.widget.get()
+            count_sym = len(entry_text)
+            symb_sum = len_clipboard_text + count_sym
 
             if symb_sum > 100:
                 text_index = event.widget.index(tkinter.INSERT)
@@ -509,7 +512,7 @@ class Tab:
                     return 'break'
             else:
                 text_index = event.widget.index(tkinter.INSERT)
-                if actual_key == 'igrave' or (self.previous_key == 'Control_L' and actual_key == 'v'):
+                if self.previous_key == 17 and actual_keycode == 86:
                     event.widget.insert(text_index, clipboard_text)
                     event.widget.icursor(text_index + len_clipboard_text)
                     return 'break'
@@ -517,29 +520,29 @@ class Tab:
                     pass
 
         elif count_sym < 100:
-            self.previous_key = actual_key
+            self.previous_key = actual_keycode
             pass
 
-        elif actual_key in ('BackSpace', 'Left', 'Right', 'Tab', 'Delete') or event.widget.selection_present():
+        elif actual_keycode in (8, 37, 39, 8, 46) or event.widget.selection_present():
             if count_sym > 100:
                 event.widget.delete(100, tkinter.END)
-            self.previous_key = actual_key
+            self.previous_key = actual_keycode
             pass
 
-        elif (self.previous_key == 'Control_L' and actual_key == 'a'):
+        elif (self.previous_key == 17 and actual_keycode == 65):
             event.widget.select_range(0, tkinter.END)
             event.widget.icursor(tkinter.END)
 
-        elif (self.previous_key == 'Control_L' and actual_key == 'c'):
+        elif (self.previous_key == 17 and actual_keycode == 67):
             selected_text = event.widget.selection_present()
             self.main_space.clipboard_append(selected_text)
 
         elif count_sym > 100:
             event.widget.delete(100, tkinter.END)
-            self.previous_key = actual_key
+            self.previous_key = actual_keycode
 
         else:
-            self.previous_key = actual_key
+            self.previous_key = actual_keycode
             return 'break'
 
     def clear_tab(self):
