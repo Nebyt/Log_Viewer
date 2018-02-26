@@ -42,8 +42,8 @@ def fill_file():
                     w1 = random.choice(words)
                     w2 = random.choice(words)
                     with open('{0}{1}test_{2}.log'.format(crt_drt, os.sep, count), 'a') as file:
-                        file.writelines('New string {0} {1} Новая строка {0} {2}\n'.format(k, w1, w2))
-                    print('New string {0} {1} Новая строка {0} {2}\n'.format(k, w1, w2))
+                        file.writelines('New string {0} {1} {2} Новая строка {0} {1} {2}\n'.format(k, w1, w2))
+                    print('New string {0} {1} {2} Новая строка {0} {1} {2}\n'.format(k, w1, w2))
                     k += 1
                 time.sleep(0.5)
         else:

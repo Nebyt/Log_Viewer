@@ -411,10 +411,10 @@ class Tab:
         next_index = start_index
         while True:
             word = self.__get_input_text()
+            if word in self.standart_word:
+                self.word_highlight_checkbox.deselect()
+                return
             while self.word_highlight_state.get():
-                if word in self.standart_word:
-                    self.word_highlight_checkbox.deselect()
-                    return
                 self.input_field.config(state='disabled')
                 if word not in self.need_check.keys():
                     self.need_check[word] = False
