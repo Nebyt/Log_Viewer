@@ -11,6 +11,7 @@ import time
 from modules.list_of_tab import list_of_tab
 import logging
 from UI_modules.window_settings import WindowSetting
+from UI_modules.search import SearchWindow
 
 
 class Tab:
@@ -20,19 +21,13 @@ class Tab:
         self.previous_key = ''
         self.main_foreground = 'white'
         self.main_background = '#696969'
+        self.is_break = False
         self.path_to_file = file_path
-        self.error_state = BooleanVar()
-        self.warn_state = BooleanVar()
-        self.debug_state = BooleanVar()
-        self.info_state = BooleanVar()
         self.word_highlight_state = BooleanVar()
         self.word_filter_state = BooleanVar()
-        self.__end = 0
-        self.search_err_index = '1.0'
-        self.search_warn_index = '1.0'
-        self.search_debug_index = '1.0'
-        self.search_info_index = '1.0'
+        self.__end = False
         self.search_word_index = '1.0'
+        self.last_search = ''
         self.tags_dict = {}
         self.need_check = {}
         self.standart_word = ('error', 'warn', 'debug', 'info')
@@ -86,6 +81,7 @@ class Tab:
 
         # при нажатии на кнопку END начинается просмотр последних данных
         self.txt.bind('<End>', self.__watch_tail)
+        self.txt.bind('<Control-f>', self.__simple_search)
 
         # при 2-м клике останавливаем просмотр
         self.txt.bind('<Double-Button-1>', self.__stop_watch_tail)
@@ -97,7 +93,7 @@ class Tab:
 
         # поток для выделения введенного слова
         self.thread_highlight_word = threading.Thread(target=self.__highlight_word,
-                                                      args=[self.search_word_index],
+                                                      args=(self.search_word_index,),
                                                       daemon=True,
                                                       name='highlight_word')
         # поток для просмотра последней строки
@@ -137,7 +133,7 @@ class Tab:
 
     def __shows_the_last_string(self):
         # На постоянке крутиться проверка для перехода к концу отображаемого
-        while True:
+        while not self.is_break:
             try:
                 while self.__end:
                     try:
@@ -145,26 +141,32 @@ class Tab:
                         time.sleep(1)
                     except AttributeError:
                         logging.warning('Tab is closed')
+                        break
                 time.sleep(1)
             except AttributeError as err:
                 logging.warning('Object and attribute is deleted', err)
+                break
 
     def __watch_tail(self, event):
         # Запуск потока для постоянного просмотра последнего изменения
-        self.__end = 1
+        self.__end = True
         if not self.thread_show_last_string.isAlive():
             self.thread_show_last_string.start()
             logging.debug('Start thread to watch tail of file %s', self.__tab_name_expect)
 
     def __stop_watch_tail(self, event):
         # Меняем триггер просмотра последнего изменения
-        self.__end = 0
+        self.__end = False
         logging.debug('Pause thread to watch tail of file %s', self.__tab_name_expect)
 
     def __search_word(self, word, start_index):
         # Поиск первой позиции слова от заданной первой позиции
         # Возращаем позицию первого символа и последнего
-        pos = self.txt.search(word, start_index, tkinter.END, nocase=True)
+        try:
+            pos = self.txt.search(word, start_index, tkinter.END, nocase=True)
+        except tkinter.TclError as err:
+            logging.warning('Object is deleted', err)
+            return
         if pos:
             string, sym = pos.split('.')
             new_sym = str(int(sym) + len(word))
@@ -190,33 +192,45 @@ class Tab:
 
     def __get_input_text(self):
         # Получаем слово из поля ввода
-        input_text = self.input_word.get().strip().lower()
-        return input_text
+        try:
+            input_text = self.input_word.get().strip().lower()
+            return input_text
+        except AttributeError as err:
+            logging.warning('We have some error', err.args)
 
     def __highlight_word(self, start_index):
         # Выделение найденного слова из поля ввода
         next_index = start_index
-        while True:
+        while not self.is_break:
             try:
                 word = self.__get_input_text()
                 while self.word_highlight_state.get():
-                    self.input_field.config(state='disabled')
-                    if word not in self.need_check.keys():
-                        self.need_check[word] = False
-                        next_index = '1.0'
-                    if self.need_check[word]:
-                        self.__highlight_again(word)
-                    first_sym, last_sym = self.__search_word(word, start_index=next_index)
-                    if last_sym:
-                        next_index = last_sym
-                        self.txt.tag_add('custom', first_sym, last_sym)
-                    else:
-                        time.sleep(1)
-                self.input_field.config(state='normal')
-                self.__unhighlight(word)
-                time.sleep(1)
-            except AttributeError as err:
-                logging.warning('Object and attribute is deleted', err)
+                    try:
+                        self.input_field.config(state='disabled')
+                        if word not in self.need_check.keys():
+                            self.need_check[word] = False
+                            next_index = '1.0'
+                        if self.need_check[word]:
+                            self.__highlight_again(word)
+                        first_sym, last_sym = self.__search_word(word, start_index=next_index)
+                        if last_sym:
+                            next_index = last_sym
+                            self.txt.tag_add('custom', first_sym, last_sym)
+                        else:
+                            time.sleep(1)
+                    except tkinter.TclError:
+                        logging.warning('Object is deleted')
+                        break
+                try:
+                    self.input_field.config(state='normal')
+                    self.__unhighlight(word)
+                    time.sleep(1)
+                except tkinter.TclError:
+                    logging.warning('Object is deleted')
+                    break
+            except AttributeError:
+                logging.warning('Object and attribute is deleted')
+                break
 
     def __unhighlight(self, tag_word):
         # Удаляем тэги
@@ -244,6 +258,11 @@ class Tab:
             last_index = '{0}.{1}'.format(string, last_symbol)
             self.txt.tag_add(tag, position, last_index)
         self.need_check[word] = False
+
+    def __simple_search(self, event):
+        print('yep!')
+        user_search = SearchWindow()
+        user_search.show()
 
     def get_all_text(self):
         # Возвращем весь текст со вкладки
@@ -333,34 +352,26 @@ class Tab:
             return 'break'
 
     def clear_tab(self):
+        del self.thread_highlight_word
+        del self.thread_show_last_string
         del self.document
         for elem in self.tags_dict:
             self.tags_dict[elem] = None
         del self.tags_dict
-        del self.thread_highlight_word
-        del self.thread_show_last_string
         self.txt.delete('1.0', tkinter.END)
-        del self.txt
         del self.main_foreground
         del self.main_background
         del self.path_to_file
-        del self.error_state
-        del self.warn_state
-        del self.debug_state
-        del self.info_state
         del self.word_highlight_state
         del self.word_filter_state
         del self.__end
-        del self.search_err_index
-        del self.search_warn_index
-        del self.search_debug_index
-        del self.search_info_index
         del self.search_word_index
         del self.need_check
         del self.standart_word
         del self.input_word
         del self.all_visible_text
+        del self.txt
+        del self.bottom_frame
         self.page.destroy()
         del self.page
-        del self.bottom_frame
         gc.collect()
