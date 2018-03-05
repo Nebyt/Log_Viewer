@@ -27,7 +27,7 @@ class Tab:
         self.word_filter_state = BooleanVar()
         self.__end = False
         self.search_word_index = '1.0'
-        self.last_search = ''
+        self.last_search = '1.0'
         self.tags_dict = {}
         self.need_check = {}
         self.standart_word = ('error', 'warn', 'debug', 'info')
@@ -81,7 +81,7 @@ class Tab:
 
         # при нажатии на кнопку END начинается просмотр последних данных
         self.txt.bind('<End>', self.__watch_tail)
-        self.txt.bind('<Control-f>', self.__simple_search)
+        self.txt.bind('<Control-f>', self.__search_window)
 
         # при 2-м клике останавливаем просмотр
         self.txt.bind('<Double-Button-1>', self.__stop_watch_tail)
@@ -259,10 +259,9 @@ class Tab:
             self.txt.tag_add(tag, position, last_index)
         self.need_check[word] = False
 
-    def __simple_search(self, event):
-        print('yep!')
-        user_search = SearchWindow()
-        user_search.show()
+    def __search_window(self, event):
+        self.user_search = SearchWindow(self.txt)
+        self.user_search.show()
 
     def get_all_text(self):
         # Возвращем весь текст со вкладки
