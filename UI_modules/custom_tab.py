@@ -11,7 +11,6 @@ import time
 from modules.list_of_tab import list_of_tab
 import logging
 from UI_modules.window_settings import WindowSetting
-from UI_modules.search import SearchWindow
 
 
 class Tab:
@@ -22,17 +21,19 @@ class Tab:
         self.main_foreground = 'white'
         self.main_background = '#696969'
         self.is_break = False
+        self.search_panel_enabled = False
         self.path_to_file = file_path
         self.word_highlight_state = BooleanVar()
         self.word_filter_state = BooleanVar()
         self.__end = False
         self.search_word_index = '1.0'
-        self.last_search = '1.0'
         self.tags_dict = {}
         self.need_check = {}
         self.standart_word = ('error', 'warn', 'debug', 'info')
         self.input_word = StringVar()
         self.all_visible_text = ''
+        self.__last_search = '1.0'
+        self.__previous_len = 0
 
         # создаем на вкладке объект документа, который читаем
         self.document = Tail(file_path)
@@ -42,6 +43,7 @@ class Tab:
 
         # нижняя область для чек боксов
         self.bottom_frame = ttk.Frame(self.page)
+        self.highlight_panel = tkinter.Frame(self.bottom_frame)
 
         # имя вкладки, берем последнее значение после разделения по символу
 
@@ -53,16 +55,18 @@ class Tab:
                                 background=self.main_background,
                                 foreground=self.main_foreground,
                                 cursor='arrow')
+        self.txt.focus()
         self.scroll = tkinter.Scrollbar(self.txt)
         self.txt.config(yscrollcommand=self.scroll.set)
         self.scroll.config(command=self.txt.yview, cursor='arrow')
         self.bottom_frame.pack(side='bottom', fill=tkinter.X)
 
-        self.input_field = tkinter.Entry(self.bottom_frame, bd=3, textvariable=self.input_word)
+        self.highlight_panel.pack(side='bottom', fill=tkinter.X)
+        self.input_field = tkinter.Entry(self.highlight_panel, bd=3, textvariable=self.input_word)
         self.input_field.pack(side='right', fill=tkinter.X, expand=True)
         self.input_field.bind('<KeyPress>', self.__key_check)
 
-        self.word_highlight_checkbox = tkinter.Checkbutton(self.bottom_frame, text='Highlight word', bd=4,
+        self.word_highlight_checkbox = tkinter.Checkbutton(self.highlight_panel, text='Highlight word', bd=4,
                                                            variable=self.word_highlight_state,
                                                            onvalue=True,
                                                            offvalue=False,
@@ -260,8 +264,80 @@ class Tab:
         self.need_check[word] = False
 
     def __search_window(self, event):
-        self.user_search = SearchWindow(self.txt)
-        self.user_search.show()
+        if not self.search_panel_enabled:
+            self.search_panel = tkinter.Frame(self.bottom_frame)
+            self.search_label = tkinter.Label(self.search_panel, text='Find: ')
+            self.search_field = tkinter.Entry(self.search_panel, bd=3)
+            self.button_previous = tkinter.Button(self.search_panel,
+                                                  text='<< Previous',
+                                                  width=14,
+                                                  command=self.__previous_result)
+            self.button_next = tkinter.Button(self.search_panel,
+                                              text='Next >>',
+                                              width=14,
+                                              command=self.__next_result)
+
+            self.search_panel.pack(side='top', fill=tkinter.X, expand=True)
+            self.search_label.pack(side='left')
+            self.search_field.pack(side='left', fill=tkinter.X, expand=True)
+            self.button_next.pack(side='right')
+            self.button_previous.pack(side='right')
+            self.search_field.bind('<KeyPress>', self.__key_check)
+
+            self.search_field.focus_set()
+
+            self.search_panel_enabled = True
+        else:
+            self.search_panel.destroy()
+            self.search_panel_enabled = False
+
+    @staticmethod
+    def __new_pos(pos, word):
+        string, sym = pos.split('.')
+        new_pos = str(int(sym) + len(word))
+        second_pos = '{0}.{1}'.format(string, new_pos)
+        return second_pos
+
+    def __next_result(self):
+        self.txt.focus_set()
+        word = self.search_field.get()
+        if self.__last_search == '1.0':
+            pos = self.txt.search(word, self.__last_search, tkinter.END, forwards=True, nocase=True)
+            if pos:
+                second_pos = self.__new_pos(pos, word)
+                self.txt.tag_add(tkinter.SEL, pos, second_pos)
+                self.txt.see(pos)
+            else:
+                self.__last_search = '1.0'
+        else:
+            next_start_index = self.__new_pos(self.__last_search, word)
+            pos = self.txt.search(word, next_start_index, tkinter.END, forwards=True, nocase=True)
+            if pos:
+                self.txt.tag_remove(tkinter.SEL, self.__last_search, tkinter.END)
+                second_pos = self.__new_pos(pos, word)
+                self.txt.tag_add(tkinter.SEL, pos, second_pos)
+                self.txt.see(pos)
+            else:
+                pos = self.__last_search
+        print(pos)
+        self.__last_search = pos
+
+    def __previous_result(self):
+        self.txt.focus_set()
+        word = self.search_field.get()
+        if self.__last_search == '1.0':
+            print('This is begin')
+        else:
+            self.txt.tag_remove(tkinter.SEL, self.__last_search, tkinter.END)
+            pos = self.txt.search(word, self.__last_search, '1.0', backwards=True, nocase=True)
+            if not pos:
+                self.__last_search = '1.0'
+            else:
+                self.__last_search = pos
+                second_pos = self.__new_pos(pos, word)
+                self.txt.tag_add(tkinter.SEL, pos, second_pos)
+                self.txt.see(pos)
+            print(self.__last_search)
 
     def get_all_text(self):
         # Возвращем весь текст со вкладки
