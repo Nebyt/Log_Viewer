@@ -11,6 +11,7 @@ pressed_key = ''
 
 
 def press_key():
+    global pressed_key
     try:
         import msvcrt
         while True:
@@ -45,7 +46,7 @@ def fill_file():
                         file.writelines('New string {0} {1} {2} Новая строка {0} {1} {2}\n'.format(k, w1, w2))
                     print('New string {0} {1} {2} Новая строка {0} {1} {2}\n'.format(k, w1, w2))
                     k += 1
-                time.sleep(0.5)
+                time.sleep(0.0001)
         else:
             pass
 

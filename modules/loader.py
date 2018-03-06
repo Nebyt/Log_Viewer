@@ -48,5 +48,24 @@ class Tail:
                 logging.error('File not found!')
             finally:
                 del text
-                gc.collect(generation=2)
+                gc.collect()
+        else:
+            text = ''
+            try:
+                with open(self.__path, 'r', encoding=self.__fmt, errors='replace') as file:
+                    file.seek(self.__tail)
+                    text = ''
+                    text = file.read(10)
+                    if text:
+                        text = file.read()
+                        self.__tail = file.tell()
+                        self.__last_change = file_last_change
+                        del file
+                return text
+            except FileNotFoundError:
+                logging.error('File not found!')
+
+            finally:
+                del text
+                gc.collect()
         return ''
