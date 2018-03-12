@@ -34,6 +34,7 @@ class Tab:
         self.__previous_len = 0
         self.__first_filter = True
         self.__was_filtered = False
+        self.__search_again = False
 
         # создаем на вкладке объект документа, который читаем
         self.__document = Tail(file_path)
@@ -135,11 +136,21 @@ class Tab:
             self.__chosen_string()
         else:
             if self.__was_filtered:
+                highlight_before = self.__word_highlight_state.get()
+                word = self.__get_input_text()
+                if highlight_before:
+                    self.__word_highlight_checkbox.deselect()
                 self.__txt.config(state='normal')
                 self.__txt.delete('1.0', tkinter.END)
                 self.__txt.config(state='disabled')
-                self.__input_field.config(state='normal')
+                if not self.__word_highlight_state.get():
+                    self.__input_field.config(state='normal')
                 self.__was_filtered = False
+                self.__search_word_index = '1.0'
+                self.__tags_dict[word] = []
+                if highlight_before:
+                    self.__search_again = True
+                    self.__word_highlight_checkbox.select()
             try:
                 self.__first_filter = True
                 self.__txt.config(state='normal')
@@ -224,6 +235,8 @@ class Tab:
                 word = self.__get_input_text()
                 while self.__word_highlight_state.get():
                     try:
+                        if self.__search_again:
+                            next_index = '1.0'
                         self.__input_field.config(state='disabled')
                         if word not in self.__need_check.keys():
                             self.__need_check[word] = False
@@ -231,6 +244,7 @@ class Tab:
                         if self.__need_check[word]:
                             self.__highlight_again(word)
                         first_sym, last_sym = self.__search_word(word, start_index=next_index)
+                        self.__search_again = False
                         if last_sym:
                             next_index = last_sym
                             self.__txt.tag_add('custom', first_sym, last_sym)
@@ -240,8 +254,11 @@ class Tab:
                         logging.warning('Object is deleted')
                         break
                 try:
-                    self.__input_field.config(state='normal')
-                    self.__unhighlight(word)
+                    if self.__chosen_string_state.get():
+                        self.__unhighlight(word)
+                    else:
+                        self.__input_field.config(state='normal')
+                        self.__unhighlight(word)
                     time.sleep(1)
                 except tkinter.TclError:
                     logging.warning('Object is deleted')
@@ -282,10 +299,18 @@ class Tab:
         if self.__first_filter:
             try:
                 self.__input_field.config(state='disabled')
+                highlight_before = self.__word_highlight_state.get()
+                if highlight_before:
+                    self.__word_highlight_checkbox.deselect()
                 self.__txt.config(state='normal')
                 self.__txt.delete('1.0', tkinter.END)
                 self.__txt.insert(tkinter.END, self.__document.get_chosen_lines(word))
                 self.__txt.config(state='disabled')
+                self.__search_word_index = '1.0'
+                self.__tags_dict[word] = []
+                if highlight_before:
+                    self.__search_again = True
+                    self.__word_highlight_checkbox.select()
                 self.__first_filter = False
                 self.__was_filtered = True
             except (tkinter.TclError, AttributeError):
