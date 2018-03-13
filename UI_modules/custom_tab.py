@@ -21,7 +21,7 @@ class Tab:
         self.__main_foreground = 'white'
         self.__main_background = '#696969'
         self.__search_panel_enabled = False
-        self.__path_to_file = file_path
+        self.path_to_file = file_path
         self.__word_highlight_state = BooleanVar()
         self.__chosen_string_state = BooleanVar()
         self.__end = False
@@ -48,8 +48,8 @@ class Tab:
 
         # имя вкладки, берем последнее значение после разделения по символу
 
-        self.__tab_name_expect = self.__path_to_file.split('/')[-1]
-        self.__tab_name = self.__set_tab_name(self.__tab_name_expect)
+        self.__tab_name_expect = self.path_to_file.split('/')[-1]
+        self.tab_name = self.__set_tab_name(self.__tab_name_expect)
         self.__txt = tkinter.Text(self.__page,
                                   font=('{0} {1}'.format(WindowSetting.font_family, WindowSetting.font_size)),
                                   spacing3=WindowSetting.spacing_btwn_str,
@@ -89,7 +89,7 @@ class Tab:
         self.__txt.tag_config("custom", background="orange", foreground="black")
 
         # добавляем вкладку
-        self.__main_space.add(self.__page, text='{}'.format(self.__tab_name))
+        self.__main_space.add(self.__page, text='{}'.format(self.tab_name))
 
         # при нажатии на кнопку END начинается просмотр последних данных
         self.__txt.bind('<End>', self.__watch_tail)
@@ -112,6 +112,7 @@ class Tab:
         self.__thread_show_last_string = threading.Thread(target=self.__shows_the_last_string,
                                                           daemon=True,
                                                           name='watch_tail')
+        logging.info('New tab is created')
 
     def __set_tab_name(self, tab_name_expect):
         # установка имени вкладки, если вкладка с таким именем уже существет добаляем порядковый номер к названию файла
@@ -128,6 +129,7 @@ class Tab:
             if tab.tab_name == tab_name_expect:
                 tab_name_expect = '{0}({1}).{2}'.format(self.__name, self.__count, file_frmt)
                 self.__count += 1
+        logging.info('New tab name is {0}'.format(tab_name_expect))
         return tab_name_expect
 
     def update_text(self):
@@ -169,11 +171,11 @@ class Tab:
                         self.__txt.see(tkinter.END)
                         time.sleep(1)
                     except AttributeError:
-                        logging.warning('Tab is closed')
+                        logging.warning('Show_the_last_string: Tab is closed')
                         break
                 time.sleep(1)
-            except AttributeError as err:
-                logging.warning('Object and attribute is deleted', err)
+            except AttributeError:
+                logging.warning('Show_the_last_string: Object and attribute is deleted')
                 break
 
     def __watch_tail(self, event):
@@ -314,7 +316,7 @@ class Tab:
                 self.__first_filter = False
                 self.__was_filtered = True
             except (tkinter.TclError, AttributeError):
-                logging.warning('The tab is already closed')
+                logging.warning('Chosen_string: The tab is already closed')
                 pass
         else:
             try:
@@ -322,7 +324,7 @@ class Tab:
                 self.__txt.insert(tkinter.END, self.__document.get_chosen_lines(word))
                 self.__txt.config(state='disabled')
             except (tkinter.TclError, AttributeError):
-                logging.warning('The tab is already closed')
+                logging.warning('Chosen_string: The tab is already closed')
                 pass
 
     def __search_window(self, event):
@@ -347,11 +349,12 @@ class Tab:
             self.__search_field.bind('<KeyPress>', self.__key_check)
 
             self.__search_field.focus_set()
-
             self.__search_panel_enabled = True
+            logging.info('Search panel is enabled')
         else:
             self.__search_panel.destroy()
             self.__search_panel_enabled = False
+            logging.info('Search panel is closed')
 
     def __new_pos(self, pos, word):
         string, sym = pos.split('.')
@@ -368,6 +371,7 @@ class Tab:
                 second_pos = self.__new_pos(pos, word)
                 self.__txt.tag_add(tkinter.SEL, pos, second_pos)
                 self.__txt.see(pos)
+                self.__last_search = pos
             else:
                 self.__last_search = '1.0'
         else:
@@ -378,16 +382,16 @@ class Tab:
                 second_pos = self.__new_pos(pos, word)
                 self.__txt.tag_add(tkinter.SEL, pos, second_pos)
                 self.__txt.see(pos)
+                self.__last_search = pos
             else:
                 pos = self.__last_search
-        print(pos)
-        self.__last_search = pos
+        logging.info('Next_result: Word {0} start on position {1}'.format(self.__last_search, word))
 
     def __previous_result(self):
         self.__txt.focus_set()
         word = self.__search_field.get()
         if self.__last_search == '1.0':
-            print('This is begin')
+            logging.info('Previous_result: Search returned in the beginning')
         else:
             self.__txt.tag_remove(tkinter.SEL, self.__last_search, tkinter.END)
             pos = self.__txt.search(word, self.__last_search, '1.0', backwards=True, nocase=True)
@@ -398,18 +402,21 @@ class Tab:
                 second_pos = self.__new_pos(pos, word)
                 self.__txt.tag_add(tkinter.SEL, pos, second_pos)
                 self.__txt.see(pos)
-            print(self.__last_search)
+        logging.info('Previous_result: Word {0} start on position {1}'.format(self.__last_search, word))
 
     def get_all_text(self):
         # Возвращем весь текст со вкладки
         self.__all_visible_text = self.__txt.get(1.0, tkinter.END)
+        logging.info('Get all text from the tab')
         return self.__all_visible_text
 
     def change_font(self, font, size, spacing):
         self.__txt.config(font=('{0} {1}'.format(font, size)), spacing3=int(spacing))
+        logging.info('Set new font = {0}, font size = {1}, spacing between string = {2}'.format(font, size, spacing))
 
     def clear_memory_text(self):
         self.__all_visible_text = ''
+        logging.debug('Clear text from variable')
 
     def __key_check(self, event):
         actual_keycode = event.keycode
@@ -417,7 +424,7 @@ class Tab:
         try:
             clipboard_text = self.__main_space.clipboard_get()
         except tkinter.TclError:
-            logging.info('Clipboard is empty')
+            logging.error('Key_check: Clipboard is empty')
             clipboard_text = ''
             pass
         len_clipboard_text = len(clipboard_text)
@@ -497,7 +504,7 @@ class Tab:
         self.__txt.delete('1.0', tkinter.END)
         del self.__main_foreground
         del self.__main_background
-        del self.__path_to_file
+        del self.path_to_file
         del self.__word_highlight_state
         del self.__end
         del self.__search_word_index
@@ -509,3 +516,4 @@ class Tab:
         self.__page.destroy()
         del self.__page
         gc.collect()
+        logging.debug('Delete the tab and all in the tab')
