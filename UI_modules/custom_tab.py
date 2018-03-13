@@ -472,7 +472,7 @@ class Tab:
             self.__previous_key = actual_keycode
             pass
 
-        elif actual_keycode in (8, 37, 39, 8, 46) or event.widget.selection_present():
+        elif actual_keycode in (8, 37, 39, 46) or event.widget.selection_present():
             if count_sym > 100:
                 event.widget.delete(100, tkinter.END)
             self.__previous_key = actual_keycode

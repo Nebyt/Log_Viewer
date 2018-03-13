@@ -7,6 +7,7 @@ from tkinter import StringVar
 from tkinter import ttk
 import os
 from modules.list_of_tab import list_of_tab
+import logging
 
 
 class WindowSetting:
@@ -77,6 +78,7 @@ class WindowSetting:
     def show(self):
         self.__top.focus_set()
         self.__top.mainloop()
+        logging.info('Window of setting is showed')
 
     def __save_button(self):
         new_font_family = self.__font_dropdown_menu.get()
@@ -87,15 +89,18 @@ class WindowSetting:
         WindowSetting.font_size = new_font_size
         WindowSetting.spacing_btwn_str = new_spacing
 
+        logging.info('Save change of font')
         for tab in list_of_tab.get_all_tab():
             tab.change_font(new_font_family, new_font_size, new_spacing)
         self.__top.destroy()
 
     def __cancel_button(self):
         self.__top.destroy()
+        logging.info("Close setting's window without saving")
 
     def __key_check(self, event):
         count_sym = len(event.widget.get())
+        # print('keycode', event.keycode, '|','keysym', event.keysym, '|', 'char', event.char)
         if event.char.isdigit():
             if count_sym < 2:
                 pass
@@ -103,8 +108,10 @@ class WindowSetting:
                 pass
             else:
                 return 'break'
-        elif event.keycode in (8, 37, 39, 8, 46) or event.widget.selection_present():
+        elif event.keycode in (8, 37, 39, 46) or event.widget.selection_present():
             if event.char.isdigit():
+                pass
+            elif event.keycode in (8, 37, 39, 46):
                 pass
             else:
                 return 'break'
