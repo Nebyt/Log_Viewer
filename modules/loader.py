@@ -57,6 +57,8 @@ class Tail:
                 logging.error('File not found!')
             except PermissionError:
                 logging.error('You not have permission to the file {0}'.format(self.__path))
+            except MemoryError:
+                logging.error('File is too big, sorry')
             finally:
                 del text
                 gc.collect()
