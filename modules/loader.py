@@ -68,9 +68,9 @@ class Tail:
                 with open(self.__path, 'r', encoding=self.__fmt, errors='replace', buffering=1) as file:
                     file.seek(self.__tail)
                     text = []
-                    av_seg = file.read(1)
-                    if av_seg:
-                        file.read(-1)
+                    exist_text = file.read(5)
+                    if exist_text:
+                        file.read(-5)
                         for line in file:
                             text.append(line)
                         self.__tail = file.tell()
@@ -131,9 +131,9 @@ class Tail:
             try:
                 with open(self.__path, 'r', encoding=self.__fmt, errors='replace', buffering=1) as file:
                     file.seek(self.__tail)
-                    exist_text = file.read(1)
+                    exist_text = file.read(5)
                     if exist_text:
-                        file.read(-1)
+                        file.read(-5)
                         for line in file:
                             if word in line.lower():
                                 new_text += line
