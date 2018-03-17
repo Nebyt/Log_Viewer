@@ -18,8 +18,6 @@ class Tab:
     def __init__(self, main_space, file_path=''):
         self.__main_space = main_space
         self.__previous_key = ''
-        self.__main_foreground = 'white'
-        self.__main_background = '#696969'
         self.__search_panel_enabled = False
         self.path_to_file = file_path
         self.__word_highlight_state = BooleanVar()
@@ -53,8 +51,8 @@ class Tab:
         self.__txt = tkinter.Text(self.__page,
                                   font=('{0} {1}'.format(WindowSetting.font_family, WindowSetting.font_size)),
                                   spacing3=WindowSetting.spacing_btwn_str,
-                                  background=self.__main_background,
-                                  foreground=self.__main_foreground,
+                                  background=WindowSetting.background_color,
+                                  foreground=WindowSetting.font_color,
                                   cursor='arrow')
         self.__txt.focus()
         self.__scroll = tkinter.Scrollbar(self.__txt)
@@ -410,9 +408,13 @@ class Tab:
         logging.info('Get all text from the tab')
         return self.__all_visible_text
 
-    def change_font(self, font, size, spacing):
-        self.__txt.config(font=('{0} {1}'.format(font, size)), spacing3=int(spacing))
-        logging.info('Set new font = {0}, font size = {1}, spacing between string = {2}'.format(font, size, spacing))
+    def change_font(self, font, size, spacing, font_color, background_color):
+        self.__txt.config(font=('{0} {1}'.format(font, size)),
+                          spacing3=int(spacing),
+                          foreground=font_color,
+                          background=background_color)
+        logging.info('Set new font = {0}, font size = {1}, spacing between string = {2}, font color {3},'
+                     ' background color {4}'.format(font, size, spacing, font_color, background_color))
 
     def clear_memory_text(self):
         self.__all_visible_text = ''
@@ -502,8 +504,6 @@ class Tab:
             self.__tags_dict[elem] = None
         del self.__tags_dict
         self.__txt.delete('1.0', tkinter.END)
-        del self.__main_foreground
-        del self.__main_background
         del self.path_to_file
         del self.__word_highlight_state
         del self.__end
