@@ -9,16 +9,21 @@ import os
 from modules.list_of_tab import list_of_tab
 from tkinter.colorchooser import askcolor
 import logging
+import json
 
 
 class WindowSetting:
-    font_family = 'TextFont'
-    font_size = 12
-    spacing_btwn_str = 2
-    font_color = 'white'
-    background_color = '#696969'
+    font_family = ''
+    font_size = None
+    spacing_btwn_str = None
+    font_color = ''
+    background_color = ''
+    directory = os.path.join(os.path.expandvars('%Appdata%'), 'pyLogViewer')
+    file_conf = 'pyLogViewer.json'
+    file_directory = os.path.join(directory, file_conf)
 
     def __init__(self):
+        self.read_setting()
         self.__width = 250
         self.__height = 200
         self.__top = tkinter.Toplevel(padx=1, pady=1)
@@ -112,16 +117,72 @@ class WindowSetting:
         self.__top.mainloop()
         logging.info('Window of setting is showed')
 
+    def read_setting(self):
+        try:
+            with open(WindowSetting.file_directory, 'r') as file:
+                setting_info = json.load(file)
+            WindowSetting.font_family = setting_info['font_family']
+            WindowSetting.font_size = setting_info['font_size']
+            WindowSetting.spacing_btwn_str = setting_info['spacing']
+            WindowSetting.font_color = setting_info['font_color']
+            WindowSetting.background_color = setting_info['background_color']
+        except FileNotFoundError:
+            logging.warning('File not found {0}'.format(WindowSetting.file_directory))
+            if not os.path.exists(WindowSetting.directory):
+                os.makedirs(WindowSetting.directory)
+                with open(WindowSetting.file_directory, 'w') as file:
+                    json_obj = json.dumps({'font_family': 'TextFont',
+                                           'font_size': 12,
+                                           'spacing': 2,
+                                           'font_color': 'white',
+                                           'background_color': 'grey'})
+                    file.write(json_obj)
+            logging.info('File of settings is created')
+            WindowSetting.font_family = 'TextFont'
+            WindowSetting.font_size = 12
+            WindowSetting.spacing_btwn_str = 2
+            WindowSetting.font_color = 'white'
+            WindowSetting.background_color = 'gray'
+        except PermissionError:
+            logging.warning('Not have permission to {0}'.format(WindowSetting.file_directory))
+
+    def __save_setting(self):
+        try:
+            with open(WindowSetting.file_directory, 'w') as file:
+                json_obj = json.dumps({'font_family': WindowSetting.font_family,
+                                       'font_size': WindowSetting.font_size,
+                                       'spacing': WindowSetting.spacing_btwn_str,
+                                       'font_color': WindowSetting.font_color,
+                                       'background_color': WindowSetting.background_color})
+                file.write(json_obj)
+        except FileNotFoundError:
+            logging.warning('File not found {0}'.format(WindowSetting.file_directory))
+            if not os.path.exists(WindowSetting.directory):
+                with open(WindowSetting.file_directory, 'w') as file:
+                    json_obj = json.dumps({'font_family': WindowSetting.font_family,
+                                           'font_size': WindowSetting.font_size,
+                                           'spacing': WindowSetting.spacing_btwn_str,
+                                           'font_color': WindowSetting.font_color,
+                                           'background_color': WindowSetting.background_color})
+                    file.write(json_obj)
+            logging.warning('File not found {0}'.format(WindowSetting.file_directory))
+        except PermissionError:
+            logging.warning('Not have permission to {0}'.format(WindowSetting.file_directory))
+
     def __choose_color_font(self):
         font_color = askcolor()
-        self.__font_color.set(font_color[1])
-        self.__font_color_panel.config(background=font_color[1])
+        if font_color[1]:
+            print(font_color)
+            self.__font_color.set(font_color[1])
+            self.__font_color_panel.config(background=font_color[1])
         self.__top.focus_set()
 
     def __choose_color_background(self):
         background_color = askcolor()
-        self.__background_color.set(background_color[1])
-        self.__background_color_panel.config(background=background_color[1])
+        if background_color[1]:
+            print(background_color)
+            self.__background_color.set(background_color[1])
+            self.__background_color_panel.config(background=background_color[1])
         self.__top.focus_set()
 
     def __save_button(self):
@@ -137,9 +198,11 @@ class WindowSetting:
         WindowSetting.font_color = new_font_color
         WindowSetting.background_color = new_background_color
 
-        logging.info('Save change of font')
+
         for tab in list_of_tab.get_all_tab():
             tab.change_font(new_font_family, new_font_size, new_spacing, new_font_color, new_background_color)
+        self.__save_setting()
+        logging.info('Save change of font')
         self.__top.destroy()
 
     def __cancel_button(self):

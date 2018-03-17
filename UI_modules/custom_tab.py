@@ -33,6 +33,8 @@ class Tab:
         self.__first_filter = True
         self.__was_filtered = False
         self.__search_again = False
+        if not WindowSetting.font_size:
+            WindowSetting.read_setting(WindowSetting)
 
         # создаем на вкладке объект документа, который читаем
         self.__document = Tail(file_path)
