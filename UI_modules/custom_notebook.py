@@ -6,6 +6,7 @@ from tkinter import ttk
 import gc
 from modules.list_of_tab import list_of_tab
 import logging
+import time
 
 
 class CustomNotebook(ttk.Notebook):
@@ -55,6 +56,9 @@ class CustomNotebook(ttk.Notebook):
         for tab in list_of_tab.get_all_tab():
             if tab.tab_name == tab_name_for_delete:
                 current_tab_name = tab.tab_name
+                tab.is_break = True
+                tab.word_highlight_checkbox = False
+                time.sleep(0.5)
                 tab.clear_tab()
                 list_of_tab.remove_tab(tab)
                 del tab

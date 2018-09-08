@@ -14,6 +14,8 @@ class Tail:
         self.__last_change = 0
         self.__log_content = ''
         self.__fmt = ''
+        self.__new_filter = True
+        self.__was_filtered = False
 
     def __recognize_format(self, path_to_file):
         # Пробуем угадать кодировку файла
@@ -29,24 +31,117 @@ class Tail:
 
     def get_lines(self):
         # Читаем файл, если файл изменялся после нашего последнего чтения
-        last_processed_change = self.__last_change
+        if self.__was_filtered:
+            self.__tail = 0
+            self.__last_change = 0
         file_last_change = os.stat(self.__path).st_mtime
+        last_processed_change = self.__last_change
         if not self.__fmt:
             self.__recognize_format(self.__path)
         if file_last_change > last_processed_change:
             text = ''
             try:
-                with open(self.__path, 'r', encoding=self.__fmt, errors='replace') as file:
+                with open(self.__path, 'r', encoding=self.__fmt, errors='replace', buffering=1) as file:
                     file.seek(self.__tail)
-                    text = ''
-                    text = file.read()
+                    text = []
+                    for line in file:
+                        text.append(line)
                     self.__tail = file.tell()
-                    self.__last_change = file_last_change
                     del file
+                self.__last_change = file_last_change
+                self.__was_filtered = False
+                self.__new_filter = True
+                text = ''.join(text)
+                return text
+            except FileNotFoundError:
+                logging.error('File not found!')
+            except PermissionError:
+                logging.error('You not have permission to the file {0}'.format(self.__path))
+            except MemoryError:
+                logging.error('File is too big, sorry')
+            finally:
+                del text
+                gc.collect()
+        else:
+            text = ''
+            try:
+                with open(self.__path, 'r', encoding=self.__fmt, errors='replace', buffering=1) as file:
+                    file.seek(self.__tail)
+                    text = []
+                    exist_text = file.read(5)
+                    if exist_text:
+                        file.read(-5)
+                        for line in file:
+                            text.append(line)
+                        self.__tail = file.tell()
+                        del file
+                    self.__last_change = file_last_change
+                    self.__was_filtered = False
+                    self.__new_filter = True
+                    text = ''.join(text)
                 return text
             except FileNotFoundError:
                 logging.error('File not found!')
             finally:
                 del text
-                gc.collect(generation=2)
+                gc.collect()
         return ''
+
+    def get_chosen_lines(self, word):
+        file_last_change = os.stat(self.__path).st_mtime
+        last_processed_change = self.__last_change
+        if self.__new_filter:
+            new_text = []
+            try:
+                self.__tail = 0
+                with open(self.__path, 'r', encoding=self.__fmt, errors='replace', buffering=1) as file:
+                    file.seek(self.__tail)
+                    for line in file:
+                        if word in line.lower():
+                            new_text.append(line)
+                    self.__tail = file.tell()
+                self.__last_change = file_last_change
+                self.__new_filter = False
+                self.__was_filtered = True
+                new_text = ''.join(new_text)
+                return new_text
+            except FileNotFoundError:
+                logging.error('File not found!')
+            finally:
+                del new_text
+                gc.collect()
+        elif file_last_change > last_processed_change:
+            new_text = ''
+            try:
+                with open(self.__path, 'r', encoding=self.__fmt, errors='replace', buffering=1) as file:
+                    file.seek(self.__tail)
+                    for line in file:
+                        if word in line.lower():
+                            new_text += line
+                    self.__tail = file.tell()
+                self.__last_change = file_last_change
+                return new_text
+            except FileNotFoundError:
+                logging.error('File not found!')
+            finally:
+                del new_text
+                gc.collect()
+        else:
+            new_text = ''
+            try:
+                with open(self.__path, 'r', encoding=self.__fmt, errors='replace', buffering=1) as file:
+                    file.seek(self.__tail)
+                    exist_text = file.read(5)
+                    if exist_text:
+                        file.read(-5)
+                        for line in file:
+                            if word in line.lower():
+                                new_text += line
+                    self.__tail = file.tell()
+                self.__last_change = file_last_change
+                return new_text
+            except FileNotFoundError:
+                logging.error('File not found!')
+            finally:
+                del new_text
+                gc.collect()

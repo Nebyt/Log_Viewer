@@ -35,6 +35,7 @@ def path_to_file():
                          filetypes=(("Log files", ".log"),
                                     ("Text files", ".txt"),
                                     ("All files", ".*")))
+    logging.info('Open file {0}'.format(op))
     return op
 
 
@@ -44,6 +45,7 @@ def save_file(event=None):
     tab_name = nb.tab(nb.select(), 'text')
     saver = Saver(tabs, tab_name)
     saver.save_one()
+    logging.info('Save text from tab {0}'.format(tab_name))
 
 
 # функция сохранения всех вкладок
@@ -51,6 +53,7 @@ def save_all_file(event=None):
     tabs = list_of_tab.get_all_tab()
     saver = Saver(tabs)
     saver.save_all()
+    logging.info('Save all text from all {0} tabs '.format(len(tabs)))
 
 
 # обновление информации на всех вкладках
@@ -60,7 +63,7 @@ def update_tabs():
             try:
                 tab.update_text()
             except AttributeError:
-                logging.warning("Tab is not existing")
+                logging.warning("Update_tabs: Tab is not existing")
         time.sleep(1)
 
 
